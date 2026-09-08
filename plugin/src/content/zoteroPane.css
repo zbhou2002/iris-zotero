@@ -9711,3 +9711,59 @@ button.llm-paper-context-summary-trigger.llm-history-context-trigger {
 .llm-panel .iris-essence-button:disabled { opacity: .4; cursor: default; }
 .iris-essence-settings > summary { cursor: pointer; }
 .iris-essence-settings > textarea { color: inherit; background: transparent; }
+
+/* Draft quotes stay inline above the composer, never cover the PDF or chat. */
+.llm-panel .iris-quote-card {
+  display: flex !important;
+  flex-direction: column;
+  flex: 1 1 100%;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+  padding: 8px 10px !important;
+  border: 0 !important;
+  border-radius: 9px !important;
+  background: color-mix(in srgb, currentColor 5%, transparent) !important;
+  color: inherit !important;
+  box-shadow: none !important;
+  font: inherit;
+}
+.llm-panel .iris-quote-header { display: flex; align-items: center; gap: 8px; }
+.llm-panel .iris-quote-title,
+.llm-panel .iris-quote-remove {
+  appearance: none;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  color: inherit !important;
+  font: inherit !important;
+  cursor: pointer;
+}
+.llm-panel .iris-quote-title {
+  flex: 1; min-width: 0; padding: 0 !important;
+  text-align: start; font-size: 11px !important; opacity: .7;
+}
+.llm-panel .iris-quote-title::before,
+.llm-panel .iris-quote-title::after { content: none !important; }
+.llm-panel .iris-quote-remove {
+  display: inline-flex; align-items: center; justify-content: center;
+  flex: 0 0 24px; width: 24px; height: 24px;
+  min-width: 24px; padding: 0 !important; border-radius: 50%;
+  font-size: 18px !important; opacity: .65;
+}
+.llm-panel .iris-quote-remove:hover { background: color-mix(in srgb, currentColor 8%, transparent) !important; opacity: 1; }
+.llm-panel .iris-quote-title:focus-visible,
+.llm-panel .iris-quote-remove:focus-visible { outline: 2px solid var(--color-accent, Highlight); outline-offset: 1px; }
+.llm-panel .iris-quote-text {
+  font: inherit; font-size: 12px; line-height: 1.55;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3; overflow: hidden;
+  user-select: text;
+}
+.llm-panel .iris-quote-card.expanded .iris-quote-text {
+  display: block; max-height: 160px; overflow-y: auto;
+}
+.llm-panel .iris-quote-paper { font-size: 10px; opacity: .55; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 4px; }
+.llm-panel .iris-quote-warning { font-size: 11px; opacity: .7; margin-top: 4px; }

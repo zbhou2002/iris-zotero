@@ -9,6 +9,7 @@ A quiet, focused research assistant for Zotero. Ask questions about your paper, 
 ## Read with less friction
 
 - **Ask your paper.** The current PDF provides text context automatically. Keep conversations and drafts in a focused sidebar.
+- **Ask about a passage.** With Iris open, select text in the PDF to attach an inline quote above the composer. Type your question and send: the quote is the focus, while the full paper remains background context. A new selection replaces the unsent quote; × removes it. Selecting alone never calls the model.
 - **Translate on demand.** Select text, then click Translate. Selecting text alone does not start a model request.
 - **Highlight the essence.** Ask the model to identify distinctive contributions and supporting evidence, then map selected passages to Zotero PDF highlights. Edit the selection prompt in Settings. There is no fixed sentence quota.
 - **Dictate locally.** Multilingual speech transcription runs locally after the optional runtime and model download. Stop to insert text, send to transcribe and send, or cancel to discard the current recording. No transcription API key is required.
