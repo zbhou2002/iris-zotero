@@ -62,7 +62,7 @@ test('context cap preserves existing attachments', () => {
   const h = fixture(); h.client.limit = 1; h.store.set(10, [{ text: 'Manual', source: 'model' }]);
   h.publish('First'); assert.equal(h.store.get(10)[0].text, 'Manual');
 });
-test('card renders literal untrusted text, accessible controls and live translated chrome', () => {
+test('chip omits source text, uses accessible controls and live translated chrome', () => {
   const h = fixture();
   const doc = { createElementNS: (_ns, tag) => ({ tag, dataset: {}, children: [], attrs: {},
     setAttribute(k, v) { this.attrs[k] = v; }, append(...nodes) { this.children.push(...nodes); } }) };
@@ -70,17 +70,19 @@ test('card renders literal untrusted text, accessible controls and live translat
   const text = '<script>do not execute</script> English 中文';
   for (const chinese of [false, true]) {
     h.ctx.renderIrisQuoteCards({ list, entries: [{ text, source: 'pdf' }], expandedIndex: -1, chinese });
-    const card = list.children[0]; assert.equal(card.children[1].textContent, text);
-    assert.equal(card.children[0].children[0].textContent, chinese ? '引用文段' : 'Quoted passage');
-    assert.equal(card.children[0].children[2].attrs['aria-label'], chinese ? '移除引用' : 'Remove quote');
-    assert.equal(card.children[0].children[1].textContent, chinese ? '当前论文' : 'Current paper');
-    assert.equal(card.children[0].children[0].attrs['aria-expanded'], 'false');
+    const card = list.children[0]; assert.equal(JSON.stringify(card).includes(text), false);
+    assert.equal(card.children[1].textContent, chinese ? '引用文段' : 'Quoted passage');
+    assert.equal(card.children[2].attrs['aria-label'], chinese ? '移除引用' : 'Remove quote');
+    assert.match(card.title, chinese ? /当前论文/ : /Current paper/);
+    assert.equal(card.children[0].attrs['aria-hidden'], 'true');
+    assert.equal(card.children[1].tag, 'span', 'label is not a misleading expand control');
   }
 });
-test('default quote marker hides the source text until explicitly expanded', () => {
+test('quote chip stays content-sized and uses existing icons instead of text glyph buttons', () => {
   const css = fs.readFileSync(new URL('src/content/zoteroPane.css', import.meta.url), 'utf8');
-  assert.match(css, /\.llm-panel \.iris-quote-text\s*\{[^}]*display: none;/);
-  assert.match(css, /\.llm-panel \.iris-quote-card\.expanded \.iris-quote-text\s*\{[^}]*display: block;/);
+  assert.match(css, /\.llm-panel \.iris-quote-card\s*\{[^}]*width: fit-content !important;/);
+  assert.match(css, /\.llm-panel \.iris-quote-remove::before\s*\{[^}]*action-x\.svg/);
+  assert.doesNotMatch(source, /make\('div', 'iris-quote-text'/);
 });
 test('send flow carries the quote separately from displayed question and keeps the paper item', async () => {
   const ctx = vm.createContext({ getPanelI18n: () => ({}), MAX_SELECTED_IMAGES: 5 });

@@ -9712,25 +9712,37 @@ button.llm-paper-context-summary-trigger.llm-history-context-trigger {
 .iris-essence-settings > summary { cursor: pointer; }
 .iris-essence-settings > textarea { color: inherit; background: transparent; }
 
-/* Draft quotes stay inline above the composer, never cover the PDF or chat. */
+/* Small attachment chips: content-sized, with no inline passage preview. */
 .llm-panel .iris-quote-card {
-  display: flex !important;
-  flex-direction: column;
-  flex: 1 1 100%;
-  width: 100% !important;
+  display: inline-flex !important;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto !important;
+  align-self: flex-start;
+  width: fit-content !important;
   min-width: 0 !important;
   max-width: 100% !important;
+  min-height: 28px;
   box-sizing: border-box;
-  padding: 8px 10px !important;
-  border: 0 !important;
-  border-radius: 9px !important;
-  background: color-mix(in srgb, currentColor 5%, transparent) !important;
-  color: inherit !important;
+  padding: 3px 4px 3px 8px !important;
+  border: 1px solid var(--stroke-secondary, rgba(128,128,128,.22)) !important;
+  border-radius: 7px !important;
+  background: transparent !important;
+  color: var(--fill-secondary, inherit) !important;
   box-shadow: none !important;
   font: inherit;
 }
-.llm-panel .iris-quote-header { display: flex; align-items: center; gap: 8px; }
-.llm-panel .iris-quote-title,
+.llm-panel .iris-quote-icon {
+  flex: 0 0 14px; width: 14px; height: 14px;
+  background: currentColor; opacity: .7;
+  mask: url('icons/action-add-text.svg') center / contain no-repeat;
+}
+.llm-panel .iris-quote-title {
+  min-width: 0; font: inherit; font-size: var(--llm-fs-12, 12px);
+  line-height: 18px; font-weight: 400;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 .llm-panel .iris-quote-remove {
   appearance: none;
   border: 0 !important;
@@ -9739,32 +9751,15 @@ button.llm-paper-context-summary-trigger.llm-history-context-trigger {
   color: inherit !important;
   font: inherit !important;
   cursor: pointer;
-}
-.llm-panel .iris-quote-title {
-  flex: 0 0 auto; min-width: 0; padding: 0 !important;
-  text-align: start; font-size: 11px !important; opacity: .7;
-}
-.llm-panel .iris-quote-title::before,
-.llm-panel .iris-quote-title::after { content: none !important; }
-.llm-panel .iris-quote-remove {
   display: inline-flex; align-items: center; justify-content: center;
-  flex: 0 0 24px; width: 24px; height: 24px;
-  min-width: 24px; padding: 0 !important; border-radius: 50%;
-  font-size: 18px !important; opacity: .65;
+  flex: 0 0 20px; width: 20px; height: 20px;
+  min-width: 20px; min-height: 20px; margin: 0;
+  padding: 0 !important; border-radius: 4px; opacity: .6;
+}
+.llm-panel .iris-quote-remove::before {
+  content: ''; display: block; width: 12px; height: 12px;
+  background: currentColor;
+  mask: url('icons/action-x.svg') center / contain no-repeat;
 }
 .llm-panel .iris-quote-remove:hover { background: color-mix(in srgb, currentColor 8%, transparent) !important; opacity: 1; }
-.llm-panel .iris-quote-title:focus-visible,
 .llm-panel .iris-quote-remove:focus-visible { outline: 2px solid var(--color-accent, Highlight); outline-offset: 1px; }
-.llm-panel .iris-quote-text {
-  font: inherit; font-size: 12px; line-height: 1.55;
-  white-space: pre-wrap; overflow-wrap: anywhere;
-  display: none;
-  user-select: text;
-}
-.llm-panel .iris-quote-card.expanded .iris-quote-text {
-  display: block; max-height: 160px; overflow-y: auto; margin-top: 5px;
-}
-.llm-panel .iris-quote-paper { flex: 1; min-width: 0; font-size: 11px; opacity: .55; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.llm-panel .iris-quote-paper::before { content: '· '; }
-.llm-panel .iris-quote-card.collapsed .iris-quote-warning { display: none; }
-.llm-panel .iris-quote-warning { font-size: 11px; opacity: .7; margin-top: 4px; }

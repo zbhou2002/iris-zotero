@@ -25,8 +25,7 @@ replaceRange('  function applySelectedTextPreview(body, itemId) {', '  function 
     const entries = getSelectedTextContextEntries(itemId);
     if (!entries.length) selectedTextPreviewExpandedCache.delete(itemId);
     body.querySelector('#llm-select-text')?.classList.toggle('llm-action-btn-active', !!entries.length);
-    renderIrisQuoteCards({ list, entries, expandedIndex: getSelectedTextExpandedIndex(itemId, entries.length),
-      chinese: getPanelLang().startsWith('zh'), warning: isLikelyCorruptedSelectedText });
+    renderIrisQuoteCards({ list, entries, chinese: getPanelLang().startsWith('zh') });
   }
 `);
 replaceOnce('    const refreshChatPreservingScroll = () => {', `    getIrisReaderQuoteBridge().register({ root: panelRoot,

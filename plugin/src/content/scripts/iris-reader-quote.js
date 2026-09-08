@@ -58,7 +58,7 @@ function getIrisReaderQuoteBridge() {
   return irisReaderQuoteBridge || (irisReaderQuoteBridge = createIrisReaderQuoteBridge());
 }
 
-function renderIrisQuoteCards({ list, entries, expandedIndex, chinese, warning }) {
+function renderIrisQuoteCards({ list, entries, chinese }) {
   const doc = list.ownerDocument;
   const make = (tag, className, text) => {
     const node = doc.createElementNS('http://www.w3.org/1999/xhtml', tag);
@@ -69,27 +69,23 @@ function renderIrisQuoteCards({ list, entries, expandedIndex, chinese, warning }
   list.replaceChildren();
   list.style.display = entries.length ? 'contents' : 'none';
   entries.forEach((entry, index) => {
-    const expanded = index === expandedIndex;
-    const card = make('div', `llm-selected-context iris-quote-card ${expanded ? 'expanded' : 'collapsed'}`);
+    const card = make('div', 'llm-selected-context iris-quote-card');
     card.dataset.contextIndex = String(index);
     card.dataset.contextSource = entry.source;
-    const header = make('div', 'iris-quote-header');
-    const title = make('button', 'llm-selected-context-meta iris-quote-title',
+    const icon = make('span', 'iris-quote-icon');
+    icon.setAttribute('aria-hidden', 'true');
+    const title = make('span', 'iris-quote-title',
       entry.source === 'model' ? (chinese ? '引用回答' : 'Quoted response') : (chinese ? '引用文段' : 'Quoted passage'));
-    title.type = 'button'; title.dataset.contextIndex = String(index);
-    title.setAttribute('aria-expanded', String(expanded));
-    title.title = expanded ? (chinese ? '收起引用' : 'Collapse quote') : (chinese ? '展开引用' : 'Expand quote');
-    const remove = make('button', 'llm-selected-context-clear iris-quote-remove', '×');
+    const remove = make('button', 'llm-selected-context-clear iris-quote-remove');
     remove.type = 'button'; remove.dataset.contextIndex = String(index);
     remove.title = chinese ? '移除引用' : 'Remove quote'; remove.setAttribute('aria-label', remove.title);
-    const paperTitle = entry.paperContext?.title || (chinese ? '当前论文' : 'Current paper');
-    const paper = make('span', 'iris-quote-paper', paperTitle);
-    paper.title = paperTitle;
-    header.append(title, paper, remove);
-    // No HTML parsing: a paper may contain markup or instructions of its own.
-    const text = make('div', 'iris-quote-text', entry.text);
-    card.append(header, text);
-    if (warning?.(entry.text)) card.append(make('div', 'iris-quote-warning', chinese ? '原文可能含有识别错误，请核对 PDF。' : 'The extracted text may contain errors. Check the PDF.'));
+    const origin = entry.source === 'model' ? 'Iris' : entry.paperContext?.title || (chinese ? '当前论文' : 'Current paper');
+    card.title = `${title.textContent} · ${origin}`;
+    card.setAttribute('role', 'group');
+    card.setAttribute('aria-label', card.title);
+    // Source content belongs in the attachment store, not in the composer DOM.
+    // Both PDF and assistant quotes use this exact same compact chip.
+    card.append(icon, title, remove);
     list.append(card);
   });
 }
