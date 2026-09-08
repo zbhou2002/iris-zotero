@@ -9741,7 +9741,7 @@ button.llm-paper-context-summary-trigger.llm-history-context-trigger {
   cursor: pointer;
 }
 .llm-panel .iris-quote-title {
-  flex: 1; min-width: 0; padding: 0 !important;
+  flex: 0 0 auto; min-width: 0; padding: 0 !important;
   text-align: start; font-size: 11px !important; opacity: .7;
 }
 .llm-panel .iris-quote-title::before,
@@ -9758,12 +9758,13 @@ button.llm-paper-context-summary-trigger.llm-history-context-trigger {
 .llm-panel .iris-quote-text {
   font: inherit; font-size: 12px; line-height: 1.55;
   white-space: pre-wrap; overflow-wrap: anywhere;
-  display: -webkit-box; -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3; overflow: hidden;
+  display: none;
   user-select: text;
 }
 .llm-panel .iris-quote-card.expanded .iris-quote-text {
-  display: block; max-height: 160px; overflow-y: auto;
+  display: block; max-height: 160px; overflow-y: auto; margin-top: 5px;
 }
-.llm-panel .iris-quote-paper { font-size: 10px; opacity: .55; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 4px; }
+.llm-panel .iris-quote-paper { flex: 1; min-width: 0; font-size: 11px; opacity: .55; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.llm-panel .iris-quote-paper::before { content: '· '; }
+.llm-panel .iris-quote-card.collapsed .iris-quote-warning { display: none; }
 .llm-panel .iris-quote-warning { font-size: 11px; opacity: .7; margin-top: 4px; }

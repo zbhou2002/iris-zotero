@@ -82,11 +82,13 @@ function renderIrisQuoteCards({ list, entries, expandedIndex, chinese, warning }
     const remove = make('button', 'llm-selected-context-clear iris-quote-remove', '×');
     remove.type = 'button'; remove.dataset.contextIndex = String(index);
     remove.title = chinese ? '移除引用' : 'Remove quote'; remove.setAttribute('aria-label', remove.title);
-    header.append(title, remove);
+    const paperTitle = entry.paperContext?.title || (chinese ? '当前论文' : 'Current paper');
+    const paper = make('span', 'iris-quote-paper', paperTitle);
+    paper.title = paperTitle;
+    header.append(title, paper, remove);
     // No HTML parsing: a paper may contain markup or instructions of its own.
     const text = make('div', 'iris-quote-text', entry.text);
     card.append(header, text);
-    if (entry.paperContext?.title) card.append(make('div', 'iris-quote-paper', entry.paperContext.title));
     if (warning?.(entry.text)) card.append(make('div', 'iris-quote-warning', chinese ? '原文可能含有识别错误，请核对 PDF。' : 'The extracted text may contain errors. Check the PDF.'));
     list.append(card);
   });

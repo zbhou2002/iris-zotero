@@ -72,9 +72,15 @@ test('card renders literal untrusted text, accessible controls and live translat
     h.ctx.renderIrisQuoteCards({ list, entries: [{ text, source: 'pdf' }], expandedIndex: -1, chinese });
     const card = list.children[0]; assert.equal(card.children[1].textContent, text);
     assert.equal(card.children[0].children[0].textContent, chinese ? '引用文段' : 'Quoted passage');
-    assert.equal(card.children[0].children[1].attrs['aria-label'], chinese ? '移除引用' : 'Remove quote');
+    assert.equal(card.children[0].children[2].attrs['aria-label'], chinese ? '移除引用' : 'Remove quote');
+    assert.equal(card.children[0].children[1].textContent, chinese ? '当前论文' : 'Current paper');
     assert.equal(card.children[0].children[0].attrs['aria-expanded'], 'false');
   }
+});
+test('default quote marker hides the source text until explicitly expanded', () => {
+  const css = fs.readFileSync(new URL('src/content/zoteroPane.css', import.meta.url), 'utf8');
+  assert.match(css, /\.llm-panel \.iris-quote-text\s*\{[^}]*display: none;/);
+  assert.match(css, /\.llm-panel \.iris-quote-card\.expanded \.iris-quote-text\s*\{[^}]*display: block;/);
 });
 test('send flow carries the quote separately from displayed question and keeps the paper item', async () => {
   const ctx = vm.createContext({ getPanelI18n: () => ({}), MAX_SELECTED_IMAGES: 5 });
