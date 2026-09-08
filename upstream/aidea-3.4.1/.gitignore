@@ -1,0 +1,51 @@
+# dot files
+.DS_Store
+Thumbs.db
+
+# Node.js
+node_modules
+pnpm-lock.yaml
+yarn.lock
+
+# TSC
+tsconfig.tsbuildinfo
+
+# Scaffold
+.env
+.scaffold
+build
+
+# Build artifacts
+*.xpi
+
+# Logs
+logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Agent artifacts
+.gemini/
+.agents/
+.claude/
+CLAUDE.md
+
+# Internal dev files
+OPTIMIZATION_PLAN.md
+REVIEW_REPORT.md
+TODO.md
+codex-models-response.json
+test-codex-chat.mjs
+test_output.txt
+
+# Reference repos (not part of this project)
+reference/
+
+# Internal plan docs
+doc/PLAN_*.md
+docs/refactor/
+
+# Local dev notes (not for GitHub)
+DEV_NOTES.md

@@ -1,0 +1,13 @@
+{
+  "name": "iris-zotero",
+  "version": "3.4.7",
+  "private": true,
+  "license": "AGPL-3.0-or-later",
+  "scripts": {
+    "build": "node plugin/build.mjs",
+    "test": "node --test plugin/test-*.mjs",
+    "check": "npm run build && npm test && node scripts/check-publication.mjs",
+    "package": "python scripts/package.py"
+  },
+  "engines": { "node": ">=22" }
+}

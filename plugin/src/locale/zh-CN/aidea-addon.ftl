@@ -1,0 +1,11 @@
+startup-begin = Iris 加载中...
+startup-finish = Iris 已就绪
+menuitem-label = Iris
+menupopup-label = Iris
+menuitem-submenulabel = Iris
+menuitem-filemenulabel = Iris
+prefs-title = Iris
+prefs-table-title = Iris
+prefs-table-detail = Iris
+tabpanel-lib-tab-label = Iris
+tabpanel-reader-tab-label = Iris

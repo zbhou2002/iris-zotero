@@ -1,0 +1,43 @@
+<vbox
+  id="aidea-prefs"
+  onload="
+    Zotero.Iris.hooks.onPrefsEvent('load', {
+      window: this.ownerDocument.defaultView,
+    })
+  "
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  xmlns:html="http://www.w3.org/1999/xhtml"
+>
+  <linkset>
+    <html:link rel="localization" href="aidea-preferences.ftl" />
+  </linkset>
+  <groupbox style="border: 0; background: transparent; box-shadow: none">
+    <html:div
+      style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 28px;
+        text-align: center;
+        gap: 12px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      "
+    >
+      <html:img
+        src="chrome://aidea/content/icons/icon-96.png"
+        alt="Iris"
+        style="width: 64px; height: 64px; margin-bottom: 8px"
+      />
+      <html:span
+        data-l10n-id="pref-sidebar-moved-title"
+        style="font-weight: 600; font-size: 17px; color: inherit"
+      />
+      <html:span style="max-width: 420px; font-size: 13px; line-height: 1.55; color: color-mix(in srgb, currentColor 62%, transparent)">
+        <html:span data-l10n-id="pref-sidebar-moved-desc" />
+        <html:br /><html:br />
+        <html:span data-l10n-id="pref-sidebar-moved-action" />
+      </html:span>
+    </html:div>
+  </groupbox>
+</vbox>

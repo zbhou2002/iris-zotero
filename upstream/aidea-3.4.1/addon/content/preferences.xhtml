@@ -1,0 +1,38 @@
+<vbox
+  id="__addonRef__-prefs"
+  onload="
+    Zotero.__addonInstance__.hooks.onPrefsEvent('load', {
+      window: this.ownerDocument.defaultView,
+    })
+  "
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  xmlns:html="http://www.w3.org/1999/xhtml"
+>
+  <linkset>
+    <html:link rel="localization" href="__addonRef__-preferences.ftl" />
+  </linkset>
+  <groupbox>
+    <html:div
+      style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        text-align: center;
+        gap: 16px;
+      "
+    >
+      <html:span style="font-size: 48px">⚙️</html:span>
+      <html:span
+        data-l10n-id="pref-sidebar-moved-title"
+        style="font-weight: 600; font-size: 16px; color: #333"
+      />
+      <html:span style="font-size: 14px; color: #666">
+        <html:span data-l10n-id="pref-sidebar-moved-desc" />
+        <html:br /><html:br />
+        <html:span data-l10n-id="pref-sidebar-moved-action" />
+      </html:span>
+    </html:div>
+  </groupbox>
+</vbox>

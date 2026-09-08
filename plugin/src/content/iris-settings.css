@@ -1,0 +1,161 @@
+/* Scoped to the settings page; the reader, composer and selection popup are untouched. */
+.iris-language-settings label { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 13px; font-weight: 600; flex-wrap: wrap; }
+.iris-language-settings .iris-language-select { width: auto; min-width: 140px; max-width: 100%; font: inherit; font-weight: 400; }
+.llm-settings-root.iris-settings {
+  --iris-setting-muted: var(--fill-secondary, #62666b);
+  --iris-setting-fg: var(--fill-primary, #27292c);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 620px;
+  box-sizing: border-box;
+  padding: 3px 0 18px;
+  color: var(--iris-setting-fg);
+  font-family: inherit;
+}
+.iris-settings .iris-settings-intro { padding: 0 2px 6px; }
+.iris-settings .iris-settings-intro h2 { margin: 0; font: inherit; font-size: 18px; font-weight: 600; letter-spacing: -.025em; }
+.iris-settings .iris-settings-intro p { margin: 5px 0 0; color: var(--iris-setting-muted); font-size: 12px; line-height: 1.6; }
+.llm-settings-root.iris-settings > .iris-settings-section {
+  gap: 0;
+  padding: 14px;
+  border: 0 !important;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--iris-setting-fg) 3%, transparent);
+  box-shadow: none;
+}
+.iris-settings .iris-settings-heading {
+  position: relative;
+  display: block;
+  padding: 0 20px 0 0;
+  margin: 0;
+  min-height: 20px;
+  color: var(--iris-setting-fg);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.6;
+  cursor: pointer;
+  list-style: none;
+}
+.iris-settings .iris-settings-heading::before { display: none !important; }
+.iris-settings .iris-settings-heading::after {
+  content: '' !important;
+  display: block !important;
+  background: none !important;
+  position: absolute;
+  right: 2px;
+  top: 6px;
+  width: 5px;
+  height: 5px;
+  border-right: 1.4px solid currentColor;
+  border-bottom: 1.4px solid currentColor;
+  opacity: .5;
+  transform: rotate(45deg);
+}
+.iris-settings .iris-settings-heading[data-collapsed="true"]::after,
+.iris-settings details:not([open]) > .iris-settings-heading::after { transform: rotate(-45deg); }
+.iris-settings .iris-settings-heading:focus-visible,
+.iris-settings summary:focus-visible { outline: 2px solid var(--color-accent, Highlight); outline-offset: 4px; border-radius: 3px; }
+.iris-settings .iris-settings-description { display: block; margin: 4px 0 0; color: var(--iris-setting-muted); font-size: 12px; font-weight: 400; line-height: 1.55; }
+.iris-settings .llm-set-collapsible-body { padding: 14px 0 0; gap: 14px; }
+.iris-settings .llm-connection-mode-tabs {
+  display: flex;
+  width: 100%;
+  margin: 0;
+  padding: 3px;
+  gap: 3px;
+  border: 0;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--iris-setting-fg) 5%, transparent);
+  box-sizing: border-box;
+}
+.iris-settings .llm-connection-mode-tabs .llm-set-tab-btn {
+  flex: 1;
+  min-width: 0;
+  min-height: 30px;
+  padding: 5px 8px;
+  border: 0 !important;
+  border-radius: 6px;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--iris-setting-muted) !important;
+  font: inherit;
+  font-size: 12px;
+}
+.iris-settings .llm-connection-mode-tabs .llm-set-tab-btn.active {
+  background: var(--material-sidepane, Canvas) !important;
+  color: var(--iris-setting-fg) !important;
+  font-weight: 600;
+}
+.iris-settings .llm-set-mode-panel > .iris-provider-list { width: 100%; margin: 2px 0 0; padding: 0; gap: 10px; }
+.iris-settings .llm-set-mode-panel > .iris-provider-list > .iris-provider { padding: 0; margin: 0; gap: 3px; border: 0 !important; background: transparent; }
+.iris-settings .iris-provider-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.iris-settings .llm-set-provider-title { min-width: 0; padding: 0; margin: 0; font-size: 12px; font-weight: 550; line-height: 1.5; }
+.iris-settings .llm-set-provider-title::before,
+.iris-settings .llm-set-provider-title::after { display: none !important; }
+.iris-settings .iris-provider-more { margin: 1px 0 0; border: 0; }
+.iris-settings .iris-provider-more > summary { width: fit-content; color: var(--iris-setting-muted); font-size: 11px; line-height: 1.8; cursor: pointer; }
+.iris-settings .iris-provider-maintenance { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 7px; }
+.iris-settings .iris-provider > .llm-set-status { display: block; padding-top: 5px; font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
+.iris-settings .iris-provider > .llm-set-status:empty { display: none; }
+.iris-settings .llm-set-btn,
+.iris-settings .llm-shortcut-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 5px 10px !important;
+  border: 0 !important;
+  border-radius: 7px !important;
+  background: color-mix(in srgb, var(--iris-setting-fg) 6%, transparent) !important;
+  color: var(--iris-setting-fg) !important;
+  box-shadow: none !important;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: normal;
+}
+.iris-settings .llm-set-btn:hover:not(:disabled),
+.iris-settings .llm-shortcut-btn:hover:not(:disabled) { background: color-mix(in srgb, var(--iris-setting-fg) 11%, transparent) !important; }
+.iris-settings .llm-set-btn--ghost { background: transparent !important; color: var(--iris-setting-muted) !important; }
+.iris-settings .llm-set-btn--ghost:hover:not(:disabled) { color: var(--accent-red, #b44040) !important; }
+.iris-settings .llm-set-input,
+.iris-settings .llm-set-select,
+.iris-settings textarea,
+.iris-settings .llm-tr-dropdown-trigger,
+.iris-settings .llm-set-dropdown-trigger {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 34px;
+  border: 1px solid color-mix(in srgb, var(--iris-setting-fg) 12%, transparent) !important;
+  border-radius: 8px !important;
+  background: var(--material-sidepane, Canvas) !important;
+  color: var(--iris-setting-fg) !important;
+  font: inherit;
+  font-size: 12px;
+  box-shadow: none !important;
+}
+.iris-settings input.llm-set-input { padding: 7px 9px; width: 100%; }
+.iris-settings .llm-set-input:focus,
+.iris-settings textarea:focus { outline: 2px solid color-mix(in srgb, var(--color-accent, Highlight) 55%, transparent); outline-offset: 1px; }
+.iris-settings .llm-set-input--error { border-color: var(--accent-red, #b44040) !important; }
+.iris-settings .llm-set-label,
+.iris-settings .llm-tr-field-label { color: var(--iris-setting-fg); font-size: 12px; font-weight: 500; line-height: 1.5; }
+.iris-settings .llm-set-field { gap: 6px; }
+.iris-settings .llm-set-hint { color: var(--iris-setting-muted); font-size: 11px; line-height: 1.55; opacity: 1; }
+.iris-settings .llm-set-hint[hidden] { display: none !important; }
+.iris-settings .llm-set-subsection,
+.iris-settings .llm-tr-lang-row { border: 0 !important; padding-top: 0; }
+.iris-settings .llm-tr-section-body { gap: 14px; }
+.iris-settings .llm-tr-checkbox-label { display: flex; align-items: center; gap: 8px; color: var(--iris-setting-fg); font-size: 12px; }
+.iris-settings .llm-set-checkbox { width: 15px; height: 15px; margin: 0; accent-color: var(--color-accent, Highlight); }
+.iris-settings .iris-prompt-editor { padding-top: 14px; }
+.iris-settings .iris-prompt-editor textarea { display: block; width: 100%; padding: 10px; min-height: 210px; line-height: 1.7 !important; margin: 7px 0 9px; resize: vertical; }
+.iris-settings .iris-prompt-editor > p { color: var(--iris-setting-muted); font-size: 11px !important; opacity: 1 !important; line-height: 1.55 !important; }
+.iris-settings .iris-prompt-actions { gap: 7px !important; margin-top: 12px; }
+.iris-settings .iris-settings-save { background: color-mix(in srgb, var(--iris-setting-fg) 11%, transparent) !important; }
+.iris-settings .iris-settings-feedback { flex-basis: 100%; color: var(--iris-setting-muted); padding-top: 3px; }
+.iris-settings .iris-settings-feedback:empty { display: none; }

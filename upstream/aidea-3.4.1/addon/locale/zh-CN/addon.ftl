@@ -1,0 +1,11 @@
+startup-begin = AIdea 加载中...
+startup-finish = AIdea 已就绪
+menuitem-label = AIdea
+menupopup-label = AIdea
+menuitem-submenulabel = AIdea
+menuitem-filemenulabel = AIdea
+prefs-title = AIdea
+prefs-table-title = AIdea
+prefs-table-detail = AIdea
+tabpanel-lib-tab-label = AIdea
+tabpanel-reader-tab-label = AIdea

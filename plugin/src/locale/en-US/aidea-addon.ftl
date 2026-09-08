@@ -1,0 +1,11 @@
+startup-begin = Iris is loading
+startup-finish = Iris is ready
+menuitem-label = Iris
+menupopup-label = Iris
+menuitem-submenulabel = Iris
+menuitem-filemenulabel = Iris
+prefs-title = Iris
+prefs-table-title = Iris
+prefs-table-detail = Iris
+tabpanel-lib-tab-label = Iris
+tabpanel-reader-tab-label = Iris
