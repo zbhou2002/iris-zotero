@@ -29,6 +29,7 @@ pref("extensions.zotero.aidea.updateNoticeSeen", "");
 pref("extensions.zotero.aidea.settingsSectionState", "");
 pref("extensions.zotero.aidea.settingsScrollTop", "0");
 pref("extensions.zotero.aidea.uiLanguage", "");
+pref("extensions.zotero.aidea.iris.uiLanguage", "auto");
 pref("extensions.zotero.aidea.showPopupAddText", true);
 pref("extensions.zotero.aidea.authorProfiles.contextMenuEnabled", false);
 pref("extensions.zotero.aidea.authorProfiles.model", "");

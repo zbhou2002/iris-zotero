@@ -53,7 +53,8 @@ var irisLanguageController;
 function getIrisLanguage() {
   return irisLanguageController || (irisLanguageController = createIrisLanguage({
     prefs: Zotero.Prefs,
-    systemLocales: () => Services.locale.systemLocales,
+    systemLocales: () => Components.classes['@mozilla.org/intl/ospreferences;1']
+      .getService(Components.interfaces.mozIOSPreferences).systemLocales,
     appLocale: () => Zotero.locale
   }));
 }
