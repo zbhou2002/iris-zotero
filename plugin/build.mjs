@@ -19,6 +19,7 @@ function replaceOnce(anchor, replacement) {
 const language = fs.readFileSync(path.join(root, 'src/content/scripts/iris-language.js'), 'utf8');
 replaceRange('  function getUiLang() {', '  function copyToClipboard(text2) {', language + '\n  function getUiLang() { return getIrisLanguage().current(); }\n');
 replaceRange('  function getPanelLang() {', '  function getPanelI18n() {', '  function getPanelLang() { return getIrisLanguage().current(); }\n');
+replaceOnce('  function getPanelI18n() {\n    const lang = getPanelLang();', '  function getPanelI18n(lang = getPanelLang()) {');
 replaceRange('  function getLang() {', '  function applyPanelLanguageAttributes(doc, lang) {', '  function getLang() { return getIrisLanguage().current(); }\n');
 // The gear is now a toggle, not a dedicated settings tab. The old draggable
 // height synchronizer still treated every gear click as "enter settings" and
@@ -100,7 +101,46 @@ replaceRange('    const handleSendIntent = async () => {', '    sendBtn.addEvent
 const essence = fs.readFileSync(path.join(root, 'src/content/scripts/iris-essence.js'), 'utf8');
 const settings = fs.readFileSync(path.join(root, 'src/content/scripts/iris-settings.js'), 'utf8');
 const externalLinks = fs.readFileSync(path.join(root, 'src/content/scripts/iris-external-links.js'), 'utf8');
-text = text.replace('  function buildUI(body, item) {', externalLinks + '\n' + settings + '\n' + essence + '\n  function buildUI(body, item) {');
+// Harvest literal Iris label pairs without executing module bodies. Native
+// upstream dictionaries are paired by key at runtime below.
+const irisPairs = [['Innovation', '创新性'], ['Voice input', '语音输入'], ['Cancel voice input', '取消本次语音输入']];
+for (const sourceText of [settings, essence, voice]) {
+  for (const match of sourceText.matchAll(/(?:say|message)\(\s*('(?:[^'\\]|\\.)*')\s*,\s*('(?:[^'\\]|\\.)*')\s*\)/g)) {
+    irisPairs.push([vm.runInNewContext(match[2]), vm.runInNewContext(match[1])]);
+  }
+}
+const liveChrome = `
+  function irisChromePairs() {
+    const pairs = ${JSON.stringify(irisPairs)};
+    const add = (en, zh) => { for (const key of Object.keys(en)) if (typeof en[key] === 'string' && typeof zh[key] === 'string') pairs.unshift([en[key], zh[key]]); };
+    add(getPanelI18n('en-US'), getPanelI18n('zh-CN'));
+    if (typeof tt === 'function') add(tt('en-US'), tt('zh-CN'));
+    return pairs;
+  }
+`;
+replaceOnce('    body.appendChild(container);', `    body.appendChild(container);
+    getIrisLanguage().subscribe(() => {
+      refreshIrisChrome(container, getPanelLang(), irisChromePairs());
+      body.lang = container.lang;
+    }, container);`);
+replaceOnce('      btn.dataset.shortcutKind = shortcut.kind;', `      btn.dataset.shortcutKind = shortcut.kind;
+      btn.dataset.irisUserLabel = String(shortcut.kind === 'custom' || Boolean((labelOverrides[shortcut.id] || '').trim()));`);
+// Refresh event-handler dictionaries too; no rebuild, focus, scroll or model request.
+const uiStart = text.indexOf('  function buildUI(body, item) {');
+const uiEnd = text.indexOf('  var PANEL_TABS, TAB_ICON_MAP;', uiStart);
+const uiSource = text.slice(uiStart, uiEnd).replace('    const i18n = getPanelI18n();', `    let i18n = getPanelI18n();
+`);
+text = text.slice(0, uiStart) + uiSource + text.slice(uiEnd);
+replaceOnce('    container.lang = languageOption.htmlLang;', `    getIrisLanguage().subscribe(() => { i18n = getPanelI18n(); }, container);
+    container.lang = languageOption.htmlLang;`);
+replaceOnce('    let item = initialItem || null;', `    getIrisLanguage().subscribe(() => {
+      i18n = getPanelI18n();
+      refreshActionLayoutForLanguage();
+      refreshChatReadinessForLanguage();
+      refreshChatPlaceholderForLanguage();
+    }, body.querySelector('.llm-panel') || body);
+    let item = initialItem || null;`);
+text = text.replace('  function buildUI(body, item) {', liveChrome + externalLinks + '\n' + settings + '\n' + essence + '\n  function buildUI(body, item) {');
 replaceOnce('    container.appendChild(statusLine);', `    container.appendChild(statusLine);
     installIrisExternalLinks({ root: container, launch: url => Zotero.launchURL(url), report: reason => {
       const zh = getPanelLang().startsWith('zh');
@@ -130,6 +170,12 @@ text = text.replace(promptSettingsAnchor, promptSettingsAnchor + `
       connectionModeBox, connectionModeTitle, connectionModeBody,
       selectionTranslateGroup, selectionTranslateTitle, selectionTranslateBody,
       oauthTabBtn, customTabBtn, oauthPanel, customPanel, authCards });
+    getIrisLanguage().subscribe(() => {
+      lang = getLang(); L = tt(lang);
+      refreshIrisChrome(root, lang, irisChromePairs());
+      renderSelectionTranslateLanguageOptions();
+      renderSelectionTranslateModelOptions();
+    }, root);
     getIrisLanguage().attach({ doc, host: root });`);
 new vm.Script(text);
 for (const removed of ['getVoiceApiKey', 'api.openai.com/v1/audio/transcriptions', 'SpeechRecognition ||']) {

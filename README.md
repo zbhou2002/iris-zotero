@@ -12,7 +12,7 @@ A quiet, focused research assistant for Zotero. Ask questions about your paper, 
 - **Translate on demand.** Select text, then click Translate. Selecting text alone does not start a model request.
 - **Highlight the essence.** Ask the model to identify distinctive contributions and supporting evidence, then map selected passages to Zotero PDF highlights. Edit the selection prompt in Settings. There is no fixed sentence quota.
 - **Dictate locally.** Multilingual speech transcription runs locally after the optional runtime and model download. Stop to insert text, send to transcribe and send, or cancel to discard the current recording. No transcription API key is required.
-- **Choose your language.** Follow your system language, or choose English / 简体中文 in Settings. Restart Zotero to apply the choice consistently.
+- **Choose your language.** Follow your system language, or choose English / 简体中文 in Settings. Changes apply immediately, without restarting or clearing your drafts and conversations.
 
 The hero above is an editorial illustration, not an application screenshot. Iris is an independent community fork of [AIdea](https://github.com/Visterainer/aidea-zotero), not an official Zotero, Apple, or OpenAI product.
 
@@ -51,4 +51,3 @@ The installer, update manifest, and checksum are written to `dist/`. The patch-b
 Only source code, distributable assets, tests, and documentation belong in this repository. Zotero libraries, PDFs, conversations, recordings, credentials, and local runtime caches are not included. Review your model provider's data policy before sending paper text. Do not attach personal profiles or unredacted logs to public issues.
 
 Iris retains the upstream **AGPL-3.0-or-later** license; see [LICENSE](LICENSE), [third-party notices](THIRD_PARTY_NOTICES.md), and [provenance](docs/PROVENANCE.md). All original notices are retained. System fonts are used; proprietary OpenAI font files are not redistributed.
-
