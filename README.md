@@ -30,13 +30,15 @@ After this first formal installation, Zotero can retrieve future Iris releases t
 
 ## Compatibility and setup
 
-The package declares Zotero **7–9** compatibility. Runtime checks have been performed on **Windows with Zotero 9.0.6**; other Zotero versions and macOS have not been fully validated. The XPI is platform-neutral. Optional local dictation includes Windows and macOS setup scripts; Linux automatic speech setup is not currently provided. Microphone access and a successful local runtime/model installation are still required.
+The package declares Zotero **7–9** compatibility. Runtime checks have been performed on **Windows and Apple Silicon macOS with Zotero 9.0.6**; other Zotero versions and Intel Macs have not been fully validated. One XPI supports both platforms; the Mac microphone helper contains arm64 and x86_64 binaries. Optional local dictation includes Windows and macOS setup scripts; Linux automatic speech setup is not currently provided. Microphone access and a successful local runtime/model installation are still required.
 
 Chat, translation, and AI highlights use the model provider you select. They are **not offline** just because dictation is local, and a provider account or API credentials may be required. Model accuracy, provider availability, and response time vary. Highlights are reading aids, not an objective ranking or a substitute for checking the paper. Scanned PDFs without usable text may need OCR first.
 
 Dictation's first setup downloads Python dependencies and a Whisper model and can take time and disk space. Once setup is complete, the transcription helper blocks network access during recognition. Sending the resulting text as a chat message still sends that text to the selected model provider.
 
 The mic checks local files when a composer opens and before each recording. If setup is missing or incomplete, click the outlined mic to install. While installing, the mic is gray and disabled; typing and chat remain available. The composer shows the current stage and elapsed time, or actual model-download bytes and a percentage when the total is known (including resumed bytes; not a timer-based estimate). Model verification must finish before recording is enabled. Click again to record; installation never starts recording automatically. Failed setup displays a reason and allows a deliberate retry. All panels share one installation, including when you switch settings or reopen the sidebar. Automatic setup currently has a 30-minute timeout; slow or interrupted connections may require retrying.
+
+On macOS, dictation runs through the bundled **Iris Voice** helper so macOS can display its own microphone permission prompt. Allow **Iris Voice** in **System Settings → Privacy & Security → Microphone**. If access is denied, Iris shows a persistent explanation and you can retry after enabling it. The helper needs microphone access only; local Whisper transcription does not require Apple's Speech Recognition permission, Accessibility, or Full Disk Access. Iris does not modify Zotero.app or reset system permissions. The first recording click installs the bundled helper into the speech runtime folder; no Xcode or Homebrew is needed. If a later helper update changes its signature, macOS may ask for consent again.
 
 ## Build from source
 
@@ -45,8 +47,11 @@ Requires Node.js 22+ and Python 3.12+. The Iris packaging path uses only their s
 ```sh
 npm run check
 python plugin/test-speech-progress.py
+sh scripts/build-macos-voice.sh  # macOS only; CI builds the universal helper
 python scripts/package.py
 ```
+
+Packaging requires the helper archive built on macOS (or downloaded from the matching CI build).
 
 The installer, update manifest, and checksum are written to `dist/`. The patch-based source layout and original upstream source are documented in [PROVENANCE](docs/PROVENANCE.md). See [CONTRIBUTING](CONTRIBUTING.md) for the release procedure.
 
