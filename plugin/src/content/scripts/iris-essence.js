@@ -440,7 +440,7 @@ function createIrisEssence({ Zotero: Z, callModel, getProfile, resolveDocument, 
       const label = doc.createElementNS('http://www.w3.org/1999/xhtml', 'span');
       label.className = 'iris-essence-label';
       label.textContent = busy ? 'cancel' : 'highlight';
-      runBtn.replaceChildren(...(busy ? [icon('cancel'), label] : [label]));
+      runBtn.replaceChildren(...(busy ? [icon('undo'), label] : [label]));
       runBtn.setAttribute('aria-label', busy ? say('取消精华标记', 'Cancel highlighting') : say('标记精华', 'Highlight essence'));
       runBtn.title = busy ? say('取消精华标记', 'Cancel highlighting') : defaultTitle();
       runBtn.setAttribute('aria-pressed', String(busy));
