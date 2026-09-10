@@ -2,7 +2,7 @@
 
 [English](../README.md) · [下载最新版本](https://github.com/zbhou2002/iris-zotero/releases/latest)
 
-Iris 是基于 AIdea 修改的 Zotero 阅读助手：结合当前论文对话、手动划词翻译、精华高亮，以及可选的本地语音输入。
+Iris 是专注论文阅读的 Zotero 助手：结合当前论文对话、手动划词翻译、精华高亮，以及可选的本地语音输入。
 
 ## 安装与更新
 
@@ -26,7 +26,7 @@ Iris 是基于 AIdea 修改的 Zotero 阅读助手：结合当前论文对话、
 
 安装包声明兼容 Zotero 7–9，实际运行测试环境为 Windows 及 Apple Silicon macOS / Zotero 9.0.6。Intel Mac 尚未完成实机验证。Linux 暂无自动语音环境安装。
 
-本项目基于 AIdea，保留 AGPL 许可和原作者信息。主页海报为宣传插画，不是程序截图。
+开源来源与许可见 [PROVENANCE](PROVENANCE.md) 和[第三方声明](../THIRD_PARTY_NOTICES.md)。主页海报为功能概念示意，不是程序截图。
 
 
 ## macOS 语音权限（3.4.13 起）
@@ -36,3 +36,7 @@ Mac 录音通过随插件提供的 **Iris Voice** 助手运行。首次使用时
 仅需要麦克风权限。Whisper 在本机转写，不需要 Apple 的语音识别、辅助功能或完全磁盘访问权限；插件不会修改 Zotero.app 或重置系统权限。助手同时包含 Apple Silicon 和 Intel 二进制，用户无需安装 Xcode 或 Homebrew。后续助手签名发生变化时，macOS 可能重新请求授权。
 
 已在 Apple Silicon Mac、Zotero 9.0.6 验证安装、窄侧栏按钮点击区域、真实麦克风访问及离线中文音频转写；Intel Mac 尚未实机验证。取消按钮现在与麦克风、发送按钮保持在同一组，窄面板中优先保留完整点击区域。
+
+## 文献精华按钮（3.4.15 起）
+
+Iris 标题旁的彩虹笔刷按钮用于筛选文献精华，中英文界面统一显示“highlight”。处理中按钮变为“cancel”；撤销仍由旁边的撤销按钮操作。
