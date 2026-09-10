@@ -16,6 +16,7 @@ assert manifest['version'] == version, 'Run npm run build first'
 assert (source / 'content/scripts/aidea.js').is_file(), 'Generated bundle is missing'
 assert manifest['applications']['zotero']['id'] == 'aidea@visterainer'
 assert manifest['applications']['zotero']['update_url'] == f"https://github.com/{config['repository']}/releases/latest/download/updates.json"
+assert (source / 'content/scripts/iris-voice-macos/IrisVoice.zip').is_file(), 'Run sh scripts/build-macos-voice.sh on macOS first'
 output = ROOT / 'dist'
 output.mkdir(exist_ok=True)
 name = f'Iris-{version}.xpi'
@@ -24,6 +25,8 @@ for path in source.rglob('*'):
     if not path.is_file():
         continue
     relative = path.relative_to(source)
+    if 'iris-voice-macos' in relative.parts and path.name != 'IrisVoice.zip':
+        continue
     if '__pycache__' in relative.parts or path.suffix in ('.pyc', '.log'):
         continue
     if relative.parts[0] not in ('content', 'locale', 'scripts') and str(relative) not in ('bootstrap.js', 'manifest.json', 'prefs.js'):
