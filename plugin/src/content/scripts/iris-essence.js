@@ -437,7 +437,10 @@ function createIrisEssence({ Zotero: Z, callModel, getProfile, resolveDocument, 
     runBtn.title = say('按设置中的提示词筛选原文；默认关注独特贡献及支撑依据，不凑数量', 'Select original passages using the prompt in settings; defaults to contributions and evidence without padding');
     const defaultTitle = () => say('按设置中的提示词筛选原文；默认关注独特贡献及支撑依据，不凑数量', 'Select original passages using the prompt in settings; defaults to contributions and evidence without padding');
     const setBusy = busy => {
-      runBtn.replaceChildren(icon(busy ? 'cancel' : 'highlight'));
+      const label = doc.createElementNS('http://www.w3.org/1999/xhtml', 'span');
+      label.className = 'iris-essence-label';
+      label.textContent = busy ? 'cancel' : 'highlight';
+      runBtn.replaceChildren(...(busy ? [icon('cancel'), label] : [label]));
       runBtn.setAttribute('aria-label', busy ? say('取消精华标记', 'Cancel highlighting') : say('标记精华', 'Highlight essence'));
       runBtn.title = busy ? say('取消精华标记', 'Cancel highlighting') : defaultTitle();
       runBtn.setAttribute('aria-pressed', String(busy));
