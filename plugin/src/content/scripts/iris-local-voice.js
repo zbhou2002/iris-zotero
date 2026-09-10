@@ -5,8 +5,11 @@ function installIrisLocalVoice({ doc, inputBox, inputSection, voiceBtn, voiceCan
   const join = (...parts) => paths.join(...parts);
   const python = zotero.isWin ? join(root, 'venv', 'Scripts', 'python.exe') : join(root, 'venv', 'bin', 'python');
   const helper = join(root, 'iris-speech.py');
+  const isMac = Boolean(zotero.isMac);
+  const macApp = join(root, 'Iris Voice.app');
   let active = null;
   let recordingStage = null;
+  let recordingError = '';
   const runtime = zotero.__irisSpeechRuntimeV2 || (zotero.__irisSpeechRuntimeV2 = createIrisSpeechRuntime({
     io, join: (...parts) => join(root, ...parts), python,
     timers: { setTimeout: (fn, ms) => setTimeout(fn, ms), clearTimeout: id => clearTimeout(id) }
@@ -42,20 +45,22 @@ function installIrisLocalVoice({ doc, inputBox, inputSection, voiceBtn, voiceCan
   const renderRuntime = () => {
     const state = runtime.snapshot();
     voiceBtn.dataset.voiceRuntime = state.phase;
-    voiceBtn.disabled = ['checking', 'installing'].includes(state.phase) || ['preparing', 'transcribing'].includes(recordingStage);
+    voiceBtn.disabled = ['checking', 'installing'].includes(state.phase) || ['preparing', 'permission', 'transcribing'].includes(recordingStage);
     voiceBtn.setAttribute('aria-busy', String(state.phase === 'installing' || Boolean(recordingStage && recordingStage !== 'listening')));
     voiceBtn.title = runtimeLabel(state);
     voiceBtn.setAttribute('aria-label', voiceBtn.title);
-    notice.hidden = !['installing', 'error'].includes(state.phase);
+    notice.hidden = !recordingError && recordingStage !== 'permission' && !['installing', 'error'].includes(state.phase);
     notice.dataset.phase = state.phase;
-    notice.textContent = notice.hidden ? '' : runtimeLabel(state);
+    notice.textContent = recordingError || (recordingStage === 'permission'
+      ? message('请在 macOS 弹窗中允许 Iris Voice 使用麦克风。', 'Allow Iris Voice to use the microphone in the macOS prompt.')
+      : notice.hidden ? '' : runtimeLabel(state));
     notice.title = notice.textContent;
   };
   const emitInput = () => inputBox.dispatchEvent(new win.Event('input', { bubbles: true }));
   const render = (stage) => {
     recordingStage = stage;
     voiceBtn.classList.toggle('is-listening', stage === 'listening');
-    voiceBtn.classList.toggle('is-processing', ['preparing', 'transcribing'].includes(stage));
+    voiceBtn.classList.toggle('is-processing', ['preparing', 'permission', 'transcribing'].includes(stage));
     voiceCancelBtn.classList.toggle('is-visible', Boolean(stage));
     if (voiceCancelBtn.parentElement) voiceCancelBtn.parentElement.style.display = stage ? '' : 'none';
     renderRuntime();
@@ -82,6 +87,37 @@ function installIrisLocalVoice({ doc, inputBox, inputSection, voiceBtn, voiceCan
     const text = await response.text();
     if (!text.trim() || text.includes('\0')) throw new Error(`Invalid speech helper: ${name}`);
     await io.writeUTF8(join(root, name), text.replace(/\r\n/g, '\n'));
+  };
+  const prepareMacApp = async () => {
+    const marker = join(root, 'mac-helper-version.txt');
+    try {
+      if (await io.readUTF8(marker) === '1' && await io.exists(join(macApp, 'Contents', 'MacOS', 'IrisVoice'))) return;
+    } catch {}
+    const response = await win.fetch('chrome://aidea/content/scripts/iris-voice-macos/IrisVoice.zip');
+    if (!response.ok) throw new Error('Could not load the Mac microphone helper');
+    const archive = join(root, 'IrisVoice.zip');
+    await io.write(archive, new Uint8Array(await response.arrayBuffer()));
+    const extracted = await launch('/usr/bin/ditto', ['-x', '-k', archive, root]).finished;
+    await io.remove(archive, { ignoreAbsent: true });
+    if (extracted !== 0) throw new Error('Could not install the Mac microphone helper');
+    const verified = await launch('/usr/bin/codesign', ['--verify', '--deep', '--strict', macApp]).finished;
+    if (verified !== 0) throw new Error('The Mac microphone helper signature is invalid. Reinstall Iris.');
+    await io.writeUTF8(marker, '1');
+  };
+  const stopProcess = async job => {
+    if (!job.process) return;
+    if (isMac) {
+      // Killing `open -W` alone leaves the app (and microphone) running.
+      // The app watches cancellation and exits only after stopping its child.
+      try { await io.writeUTF8(job.files.cancel, 'cancel'); } catch {}
+      let timer;
+      await Promise.race([job.process.finished.catch(() => {}), new Promise(resolve => {
+        timer = win.setTimeout(resolve, 5000);
+      })]);
+      win.clearTimeout(timer);
+    }
+    try { if (job.process.proc.isRunning) job.process.proc.kill(); } catch {}
+    await job.process.finished.catch(() => {});
   };
   const installRuntime = () => {
     const script = zotero.isWin ? 'iris-speech-setup.ps1' : 'iris-speech-setup.sh';
@@ -122,10 +158,7 @@ function installIrisLocalVoice({ doc, inputBox, inputSection, voiceBtn, voiceCan
     if (job.finished) return;
     job.finished = true;
     win.clearTimeout(job.timer);
-    try {
-      if (job.process?.proc.isRunning) job.process.proc.kill();
-    } catch {}
-    if (job.process) await job.process.finished.catch(() => {});
+    await stopProcess(job);
     if (active === job) {
       const text = String(result?.text || '').trim();
       const success = Boolean(result?.ok && text && !job.cancelled);
@@ -138,7 +171,10 @@ function installIrisLocalVoice({ doc, inputBox, inputSection, voiceBtn, voiceCan
         emitInput();
         announce(message('本地语音识别完成', 'Local voice recognition complete'));
       } else if (!job.cancelled && !result?.cancelled) {
-        const error = result?.error || 'No speech detected';
+        const error = result?.code === 'microphone_denied'
+          ? message('麦克风权限未开启：请在系统设置 → 隐私与安全性 → 麦克风中允许 Iris Voice，然后重试。', 'Allow Iris Voice in System Settings → Privacy & Security → Microphone, then retry.')
+          : result?.error || 'No speech detected';
+        recordingError = error;
         announce(message('本地语音识别未完成：', 'Local recognition did not complete: ') + error, 'error');
       }
       active = null;
@@ -150,7 +186,6 @@ function installIrisLocalVoice({ doc, inputBox, inputSection, voiceBtn, voiceCan
   const poll = async (job) => {
     if (job.finished) return;
     if (!inputSection.isConnected || Date.now() > job.deadline) {
-      try { job.process?.proc.kill(); } catch {}
       await finish(job, { error: 'Speech recording or recognition timed out' });
       return;
     }
@@ -168,7 +203,9 @@ function installIrisLocalVoice({ doc, inputBox, inputSection, voiceBtn, voiceCan
           render(stage);
           announce(stage === 'listening'
             ? message('正在听…点麦克风完成，点发送识别并发送，点 × 取消', 'Listening…mic to finish, send to transcribe and send, × to cancel')
-            : message('正在本地识别中英文…', 'Recognizing speech locally…'));
+            : stage === 'permission'
+              ? message('请允许 Iris Voice 使用麦克风', 'Please allow Iris Voice to use the microphone')
+              : message('正在本地识别中英文…', 'Recognizing speech locally…'));
         }
       }
     } catch (error) {
@@ -181,6 +218,7 @@ function installIrisLocalVoice({ doc, inputBox, inputSection, voiceBtn, voiceCan
     const job = { cancelled: false, finished: false, stopRequested: false, files: null, process: null };
     job.completion = new Promise(resolve => { job.resolve = resolve; });
     active = job;
+    recordingError = '';
     render('preparing');
     announce(message('正在准备本地语音…', 'Preparing local voice input…'));
     try {
@@ -191,6 +229,7 @@ function installIrisLocalVoice({ doc, inputBox, inputSection, voiceBtn, voiceCan
         return;
       }
       await copyResource('iris-speech.py');
+      if (isMac) await prepareMacApp();
       if (job.cancelled || job.stopRequested || !inputSection.isConnected) {
         await finish(job, { error: 'Recording was not started' });
         return;
@@ -200,7 +239,9 @@ function installIrisLocalVoice({ doc, inputBox, inputSection, voiceBtn, voiceCan
       await io.writeUTF8(job.files.job, JSON.stringify({ ...job.files, maxSeconds: 60 }));
       if (job.cancelled) { await clean(job); return; }
       job.deadline = Date.now() + 240000;
-      job.process = launch(python, [helper, 'run', '--root', root, '--job', job.files.job]);
+      job.process = isMac
+        ? launch('/usr/bin/open', ['-n', '-g', '-W', macApp, '--args', root, job.files.job])
+        : launch(python, [helper, 'run', '--root', root, '--job', job.files.job]);
       job.process.finished.then(async () => {
         if (!job.finished && !await io.exists(job.files.done)) await finish(job, { error: 'Local speech process exited unexpectedly' });
       }, error => void finish(job, { error: String(error) }));
@@ -228,8 +269,6 @@ function installIrisLocalVoice({ doc, inputBox, inputSection, voiceBtn, voiceCan
     if (job.files) {
       try { await io.writeUTF8(job.files.cancel, 'cancel'); } catch {}
     }
-    try { job.process?.proc.kill(); } catch {}
-    if (job.process) await job.process.finished.catch(() => {});
     await finish(job, { cancelled: true });
     announce(message('已取消本次语音输入', 'Voice input cancelled'));
   };
