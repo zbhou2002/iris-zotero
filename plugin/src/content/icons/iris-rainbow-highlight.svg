@@ -1,16 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 132 44" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 82 30" fill="none">
   <defs>
-    <linearGradient id="ink" x1="5" y1="27" x2="108" y2="27" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#ff9aaa"/><stop offset=".2" stop-color="#ffc47c"/><stop offset=".4" stop-color="#eee88c"/><stop offset=".6" stop-color="#9be0b9"/><stop offset=".8" stop-color="#9bd8ed"/><stop offset="1" stop-color="#c5adf0"/>
+    <linearGradient id="ink" x1="3" y1="23" x2="61" y2="23" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f7a5b4"/><stop offset=".2" stop-color="#f8c18f"/><stop offset=".4" stop-color="#eae79f"/><stop offset=".6" stop-color="#ade1bf"/><stop offset=".8" stop-color="#abd9e9"/><stop offset="1" stop-color="#c6b5e9"/>
     </linearGradient>
-    <linearGradient id="sheen" x2="0" y2="1"><stop stop-color="white" stop-opacity=".34"/><stop offset="1" stop-color="white" stop-opacity="0"/></linearGradient>
-    <linearGradient id="barrel" x1="110" y1="5" x2="124" y2="17" gradientUnits="userSpaceOnUse"><stop stop-color="#fbfcff"/><stop offset=".44" stop-color="#fff"/><stop offset="1" stop-color="#b4bacd"/></linearGradient>
-    <linearGradient id="nib" x1="103" y1="25" x2="111" y2="30" gradientUnits="userSpaceOnUse"><stop stop-color="#b5a0df"/><stop offset="1" stop-color="#8064b4"/></linearGradient>
+    <linearGradient id="ink-surface" x1="0" y1="16" x2="0" y2="29" gradientUnits="userSpaceOnUse">
+      <stop stop-color="white" stop-opacity=".28"/><stop offset=".38" stop-color="white" stop-opacity=".05"/><stop offset=".78" stop-color="white" stop-opacity="0"/><stop offset="1" stop-color="#716080" stop-opacity=".09"/>
+    </linearGradient>
   </defs>
-  <path d="M9 15C33 14 52 15 74 14.5L104 15Q111 15 110 24L108 34Q107 38 100 38L9 37Q4 37 5 31L6 20Q6 16 9 15Z" fill="url(#ink)" opacity=".93"/>
-  <path d="M9 16L104 16Q109 16 108 22L8 23Z" fill="url(#sheen)"/>
-  <path d="M101 26L108 20L116 26L107 32L101 31Z" fill="url(#nib)"/>
-  <path d="M108 21L119 5Q121 2 124 4L130 9Q132 11 130 14L117 29Z" fill="url(#barrel)" stroke="#9299b0" stroke-opacity=".38" stroke-width=".7"/>
-  <path d="M111 20L121 7" stroke="white" stroke-width="2" stroke-linecap="round" opacity=".85"/>
-  <path d="M108 22L117 29" stroke="#b5b8c8" stroke-width="1"/>
+  <path transform="translate(0 -18.375) scale(1 1.35)" d="M5 16.5Q28 16 58 16.5Q61 16.5 60.5 20L59.5 27.5Q59 29.5 56 29L4 29Q2 29 2.5 26L3 19Q3 17 5 16.5Z" fill="url(#ink)"/>
+  <path transform="translate(0 -18.375) scale(1 1.35)" d="M5 16.5Q28 16 58 16.5Q61 16.5 60.5 20L59.5 27.5Q59 29.5 56 29L4 29Q2 29 2.5 26L3 19Q3 17 5 16.5Z" fill="url(#ink-surface)"/>
+  <g transform="translate(59 17) rotate(-30)">
+    <path d="M0 0L3 -2.5H5V2.5H2Z" fill="#9984bd"/>
+    <rect x="4" y="-3.5" width="15" height="7" rx="2" fill="#e8e7ee" stroke="#b1a7c2" stroke-width=".6"/>
+  </g>
 </svg>
