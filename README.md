@@ -14,6 +14,8 @@ A focused AI reading companion for Zotero. **Ask about the passage in front of y
 
 **[Download Iris →](https://github.com/zbhou2002/iris-zotero/releases/latest)** &nbsp; · &nbsp; [Get started](#start-reading-with-iris) &nbsp; · &nbsp; [简体中文 ↓](#简体中文)
 
+**New in [3.4.16](https://github.com/zbhou2002/iris-zotero/releases/tag/v3.4.16):** a refined rainbow highlighter, consistent circular controls, and a calmer, evenly aligned composer.
+
 ### Your AI. Your way.
 
 **Already use Codex? Connect through its supported account sign-in—no separate API key to enter.** Iris can bridge an existing Codex CLI OAuth login into your reading workflow. Prefer your own model service? Use an API endpoint, model and key when required. Choose **Account** or **API service** in Settings.
@@ -27,8 +29,8 @@ Account access follows your provider’s plan, available models and usage limits
 | **01 · Quote a passage. Ask a sharper question.** | Select a passage in your PDF and attach it to your question. Iris focuses on that passage while keeping the paper as background context. Ask “Why does this follow?” without copying a paragraph into another app. |
 | **02 · Translate the part that stops you.** | Select text and choose Translate. Get help with a difficult sentence or unfamiliar wording, right where you are reading. You choose when translation starts. |
 | **03 · Speak the thought before it slips away.** | Dictate a question in Chinese, English or a mix of both. Local Whisper transcription turns your voice into text for the conversation. No separate transcription API key. |
-| **04 · Less interface. More room to think.** | A clean sidebar, compact passage references and a simple composer keep attention on the paper. English and 简体中文 switch instantly. No preset prompt-button row. |
-| **05 · Find the contribution—and its evidence.** | The rainbow highlight button opens Paper Essence, which selects passages about distinctive contributions and their supporting evidence, then highlights them in the original PDF. Adjust the selection criteria to the way you read. |
+| **04 · Less interface. More room to think.** | Quiet monochrome controls, compact passage references and a balanced composer keep attention on the paper. The input stays visually calm when you click it. Start fresh or return to an earlier conversation with the new-chat and history buttons. |
+| **05 · Find the contribution—and its evidence.** | A short rainbow pen stroke brings Paper Essence within reach: select original passages about distinctive contributions and supporting evidence, directly in your PDF. During processing, the same control becomes cancel with a return arrow. Both labels stay in English in either interface language. |
 
 ### From “this sentence…” to your next insight
 
@@ -70,6 +72,8 @@ Iris 是陪你留在论文里的 AI 阅读助手。**选中文段就能追问，
 
 **[下载 Iris →](https://github.com/zbhou2002/iris-zotero/releases/latest)** &nbsp; · &nbsp; [安装与使用](docs/README.zh-CN.md) &nbsp; · &nbsp; [English ↑](#english)
 
+**[3.4.16 新版](https://github.com/zbhou2002/iris-zotero/releases/tag/v3.4.16)：** 更精致的彩虹高亮笔、统一的圆形操作按钮，以及留白对称、点击时保持原色的输入区。
+
 ### 订阅也好，API 也好，用你自己的 AI。
 
 **已经在用 Codex？通过支持的账号登录方式接入，不必再填一把 API Key。** Iris 可以桥接 Codex CLI 的已有 OAuth 登录，让你在论文旁使用账号可用的模型；也支持配置自己的 API 地址、模型和所需密钥。在设置中选择 **账号连接** 或 **API 服务** 即可。
@@ -83,8 +87,8 @@ Iris 是陪你留在论文里的 AI 阅读助手。**选中文段就能追问，
 | **01 · 引用这一段，把问题问到点上。** | 在 PDF 中选中文段，附上你的问题。Iris 聚焦这段内容，同时保留全文作为背景。问一句“这里为什么能得出这个结论？”，不用来回复制、切换窗口。 |
 | **02 · 卡住你的那句话，就地读懂。** | 选中原文，点击翻译。处理难句和陌生表达时，把注意力留在正在读的位置。是否翻译，由你决定。 |
 | **03 · 想到了，就说出来。** | 用中文、英文或中英混合表达问题，Whisper 在本机转写为对话文字。少打一点字，留住阅读时一闪而过的想法，无需额外的转写 API Key。 |
-| **04 · 更清爽，也更专注。** | 简洁侧栏、小巧的引用标签与干净的输入区，让空间回到论文和思考。中英文界面即时切换；去掉预设提问按钮，让你自己决定问什么。 |
-| **05 · 抓住贡献，也找到依据。** | 醒目的彩虹“highlight”按钮，筛选独特贡献与支撑证据，并直接高亮到 PDF 原文。你也可以调整筛选标准，让它更贴合自己的阅读重点。 |
+| **04 · 更清爽，也更专注。** | 单色操作按钮、小巧的引用标签和留白均衡的输入区，让空间回到论文和思考。点击输入框保持原色；随时新建对话，也能从历史记录接着聊。 |
+| **05 · 抓住贡献，也找到依据。** | 像高亮笔划过纸面的一道彩虹，把独特贡献与支撑证据标回 PDF 原文。处理中，同一个按钮切换为带回退箭头的 cancel，随时取消。中英文界面都保留 highlight / cancel 英文标识；筛选标准也可自行调整。 |
 
 ### 从“这一句……”开始，顺着问题读下去
 
