@@ -195,6 +195,8 @@ replaceOnce('    container.appendChild(statusLine);', `    container.appendChild
         : (zh ? '无法打开链接，请检查系统默认浏览器。' : 'Could not open the link. Check your default browser.');
       setStatus(statusLine, message, 'error'); statusLine.title = message;
     } });`);
+// The Zotero section already displays Iris; keep the action bar free of a duplicate title.
+replaceOnce('    headerInfo.append(title);', '    title.hidden = true;\n    headerInfo.append(title);');
 // Omit the preset prompt row entirely; renderShortcuts already exits when absent.
 replaceOnce('    const shortcutsRow = createElement(doc, "div", "llm-shortcuts", {\n      id: "llm-shortcuts"\n    });', '');
 const essenceAnchor = '    discussionBottom.append(shortcutsRow, inputSection);';
