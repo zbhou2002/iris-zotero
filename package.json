@@ -1,6 +1,6 @@
 {
   "name": "iris-zotero",
-  "version": "3.4.14",
+  "version": "3.4.15",
   "private": true,
   "license": "AGPL-3.0-or-later",
   "scripts": {
@@ -11,4 +11,3 @@
   },
   "engines": { "node": ">=22" }
 }
-
