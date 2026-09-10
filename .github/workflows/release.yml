@@ -5,10 +5,28 @@ on:
     tags: ['v*']
   pull_request:
   workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish the version in release.json as a new release
+        type: boolean
+        default: false
 permissions:
   contents: read
 jobs:
+  macos-voice:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sh scripts/build-macos-voice.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iris-macos-voice
+          path: plugin/src/content/scripts/iris-voice-macos/IrisVoice.zip
+          if-no-files-found: error
   build:
+    needs: macos-voice
+    outputs:
+      version: ${{ steps.version.outputs.value }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,8 +36,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - id: version
+        run: node -e 'console.log("value="+require("./release.json").version)' >> "$GITHUB_OUTPUT"
       - run: npm run check
       - run: python plugin/test-speech-progress.py
+      - uses: actions/download-artifact@v4
+        with:
+          name: iris-macos-voice
+          path: plugin/src/content/scripts/iris-voice-macos
       - run: python scripts/package.py
       - name: Verify release tag
         if: startsWith(github.ref, 'refs/tags/')
@@ -31,7 +55,7 @@ jobs:
           if-no-files-found: error
   release:
     needs: build
-    if: startsWith(github.ref, 'refs/tags/') && github.repository == 'zbhou2002/iris-zotero'
+    if: (startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && inputs.publish && github.ref == 'refs/heads/main')) && github.repository == 'zbhou2002/iris-zotero'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -44,5 +68,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: ${{ github.ref_name }}
-        run: gh release create "$RELEASE_TAG" dist/* --verify-tag --title "Iris $RELEASE_TAG" --generate-notes
+          RELEASE_TAG: v${{ needs.build.outputs.version }}
+        run: gh release create "$RELEASE_TAG" dist/* --target "$GITHUB_SHA" --title "Iris $RELEASE_TAG" --generate-notes
