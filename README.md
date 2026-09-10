@@ -36,12 +36,15 @@ Chat, translation, and AI highlights use the model provider you select. They are
 
 Dictation's first setup downloads Python dependencies and a Whisper model and can take time and disk space. Once setup is complete, the transcription helper blocks network access during recognition. Sending the resulting text as a chat message still sends that text to the selected model provider.
 
+The mic checks local files when a composer opens and before each recording. If setup is missing or incomplete, click the outlined mic to install. While installing, the mic is gray and disabled; typing and chat remain available. The composer shows the current stage and elapsed time, or actual model-download bytes and a percentage when the total is known (including resumed bytes; not a timer-based estimate). Model verification must finish before recording is enabled. Click again to record; installation never starts recording automatically. Failed setup displays a reason and allows a deliberate retry. All panels share one installation, including when you switch settings or reopen the sidebar. Automatic setup currently has a 30-minute timeout; slow or interrupted connections may require retrying.
+
 ## Build from source
 
 Requires Node.js 22+ and Python 3.12+. The Iris packaging path uses only their standard libraries; no npm install is needed.
 
 ```sh
 npm run check
+python plugin/test-speech-progress.py
 python scripts/package.py
 ```
 

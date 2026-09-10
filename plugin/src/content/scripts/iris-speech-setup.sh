@@ -3,6 +3,8 @@ set -eu
 root=$1
 mkdir -p "$root"
 exec 2>"$root/setup-error.txt"
+progress() { printf '{"stage":"%s"}\n' "$1" > "$root/setup-progress.json.tmp"; mv "$root/setup-progress.json.tmp" "$root/setup-progress.json"; }
+progress components
 case "$(uname -sm)" in
   'Darwin arm64') asset=uv-aarch64-apple-darwin ;;
   'Darwin x86_64') asset=uv-x86_64-apple-darwin ;;
@@ -10,8 +12,8 @@ case "$(uname -sm)" in
 esac
 if [ ! -x "$root/$asset/uv" ]; then
   base=https://github.com/astral-sh/uv/releases/download/0.11.30
-  curl --fail --location "$base/$asset.tar.gz" -o "$root/$asset.tar.gz"
-  curl --fail --location "$base/$asset.tar.gz.sha256" -o "$root/$asset.tar.gz.sha256"
+  curl --fail --location --connect-timeout 20 --max-time 300 --retry 2 "$base/$asset.tar.gz" -o "$root/$asset.tar.gz"
+  curl --fail --location --connect-timeout 20 --max-time 120 --retry 2 "$base/$asset.tar.gz.sha256" -o "$root/$asset.tar.gz.sha256"
   expected=$(cut -d ' ' -f 1 "$root/$asset.tar.gz.sha256")
   actual=$(shasum -a 256 "$root/$asset.tar.gz" | cut -d ' ' -f 1)
   [ "$actual" = "$expected" ] || { echo 'uv download checksum mismatch' >&2; exit 1; }
@@ -19,9 +21,14 @@ if [ ! -x "$root/$asset/uv" ]; then
 fi
 export UV_PYTHON_INSTALL_DIR="$root/python"
 export UV_CACHE_DIR="$root/cache"
+export UV_HTTP_TIMEOUT=60
+export UV_HTTP_RETRIES=2
 uv="$root/$asset/uv"
+progress python
 if [ ! -x "$root/venv/bin/python" ]; then
   "$uv" venv --python 3.12 --managed-python "$root/venv"
 fi
-"$uv" pip install --python "$root/venv/bin/python" 'faster-whisper==1.2.1' 'sounddevice==0.5.3'
+progress engine
+"$uv" pip install --python "$root/venv/bin/python" 'faster-whisper==1.2.1' 'sounddevice==0.5.3' 'huggingface-hub==1.30.0'
+progress model
 "$root/venv/bin/python" "$root/iris-speech.py" setup --root "$root"

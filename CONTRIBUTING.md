@@ -3,7 +3,7 @@
 Use this repository as the canonical Iris source. Do not upload a Zotero profile, personal PDFs, chat history, audio recordings, access tokens, runtime caches, or machine-specific test output.
 
 1. Edit `plugin/` source inputs. Do not edit generated `plugin/src/content/scripts/aidea.js`.
-2. Run `npm run check` and `python scripts/package.py`.
+2. Run `npm run check`, `python plugin/test-speech-progress.py`, and `python scripts/package.py`.
 3. Test the installer in an isolated Zotero profile. Check reopening the sidebar, settings → chat, external links, selection translation, and dictation state handling. Never test against a user's live library without permission.
 4. Update `release.json` and the root package version together for a release. Use a new stable numeric version higher than the previous release.
 5. Commit and push the reviewed changes to `main`. A main push runs CI but does not publish an addon update.

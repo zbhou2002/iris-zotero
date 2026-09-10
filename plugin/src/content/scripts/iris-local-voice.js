@@ -6,13 +6,59 @@ function installIrisLocalVoice({ doc, inputBox, inputSection, voiceBtn, voiceCan
   const python = zotero.isWin ? join(root, 'venv', 'Scripts', 'python.exe') : join(root, 'venv', 'bin', 'python');
   const helper = join(root, 'iris-speech.py');
   let active = null;
+  let recordingStage = null;
+  const runtime = zotero.__irisSpeechRuntimeV2 || (zotero.__irisSpeechRuntimeV2 = createIrisSpeechRuntime({
+    io, join: (...parts) => join(root, ...parts), python,
+    timers: { setTimeout: (fn, ms) => setTimeout(fn, ms), clearTimeout: id => clearTimeout(id) }
+  }));
   const message = (zh, en) => isChinese() ? zh : en;
+  const notice = doc.createElementNS('http://www.w3.org/1999/xhtml', 'div');
+  notice.className = 'iris-voice-install-status';
+  notice.setAttribute('role', 'status'); notice.setAttribute('aria-live', 'polite');
+  inputSection.appendChild(notice);
+  const runtimeLabel = state => {
+    if (state.phase === 'checking') return message('正在检查本地语音模型…', 'Checking local speech model…');
+    if (state.phase === 'missing') return message('未安装本地语音，点击下载模型（约 700 MB）', 'Install local voice input (about 700 MB)');
+    if (state.phase === 'error') return message('安装失败，点击麦克风重试：', 'Setup failed. Click the mic to retry: ') + state.error;
+    if (state.phase === 'installing') {
+      const stages = {
+        components: message('正在下载语音组件', 'Downloading speech components'),
+        python: message('正在安装本地 Python', 'Installing local Python'),
+        engine: message('正在安装语音识别引擎', 'Installing speech engine'),
+        model: message('正在下载 Whisper 模型', 'Downloading Whisper model'),
+        verify: message('正在验证本地模型', 'Verifying local model')
+      };
+      if (state.stage === 'model' && (state.totalBytes || state.downloadedBytes)) {
+        const mb = bytes => (bytes / 1000000).toFixed(1) + ' MB';
+        const progress = state.totalBytes
+          ? `${Math.floor(state.downloadedBytes / state.totalBytes * 100)}% · ${mb(state.downloadedBytes)} / ${mb(state.totalBytes)}`
+          : mb(state.downloadedBytes);
+        return `${stages.model} · ${progress}`;
+      }
+      return `${stages[state.stage] || stages.components} · ${state.seconds}s`;
+    }
+    return message('语音输入', 'Voice input');
+  };
+  const renderRuntime = () => {
+    const state = runtime.snapshot();
+    voiceBtn.dataset.voiceRuntime = state.phase;
+    voiceBtn.disabled = ['checking', 'installing'].includes(state.phase) || ['preparing', 'transcribing'].includes(recordingStage);
+    voiceBtn.setAttribute('aria-busy', String(state.phase === 'installing' || Boolean(recordingStage && recordingStage !== 'listening')));
+    voiceBtn.title = runtimeLabel(state);
+    voiceBtn.setAttribute('aria-label', voiceBtn.title);
+    notice.hidden = !['installing', 'error'].includes(state.phase);
+    notice.dataset.phase = state.phase;
+    notice.textContent = notice.hidden ? '' : runtimeLabel(state);
+    notice.title = notice.textContent;
+  };
   const emitInput = () => inputBox.dispatchEvent(new win.Event('input', { bubbles: true }));
   const render = (stage) => {
+    recordingStage = stage;
     voiceBtn.classList.toggle('is-listening', stage === 'listening');
     voiceBtn.classList.toggle('is-processing', ['preparing', 'transcribing'].includes(stage));
     voiceCancelBtn.classList.toggle('is-visible', Boolean(stage));
     if (voiceCancelBtn.parentElement) voiceCancelBtn.parentElement.style.display = stage ? '' : 'none';
+    renderRuntime();
   };
   const launch = (executable, args) => {
     const file = components.classes['@mozilla.org/file/local;1'].createInstance(components.interfaces.nsIFile);
@@ -35,36 +81,36 @@ function installIrisLocalVoice({ doc, inputBox, inputSection, voiceBtn, voiceCan
     if (!response.ok) throw new Error(`Could not load ${name}`);
     const text = await response.text();
     if (!text.trim() || text.includes('\0')) throw new Error(`Invalid speech helper: ${name}`);
-    await io.writeUTF8(join(root, name), text);
+    await io.writeUTF8(join(root, name), text.replace(/\r\n/g, '\n'));
   };
-  const ensureRuntime = async () => {
-    if (!zotero.__irisSpeechSetup) {
-      zotero.__irisSpeechSetup = (async () => {
+  const installRuntime = () => {
+    const script = zotero.isWin ? 'iris-speech-setup.ps1' : 'iris-speech-setup.sh';
+    return runtime.install({
+      prepare: async () => {
         await io.makeDirectory(root, { ignoreExisting: true });
-        await copyResource('iris-speech.py');
-        if (await io.exists(python) && await io.exists(join(root, 'ready.json'))) return;
-        announce(message('首次准备本地语音模型：正在下载组件，约 700 MB…', 'First-time setup: downloading local speech components, about 700 MB…'));
-        const script = zotero.isWin ? 'iris-speech-setup.ps1' : 'iris-speech-setup.sh';
-        await copyResource(script);
-        const process = zotero.isWin
-          ? launch('C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
-            ['-NoProfile', '-NonInteractive', '-WindowStyle', 'Hidden', '-ExecutionPolicy', 'Bypass', '-File', join(root, script), '-Root', root])
-          : launch('/bin/sh', [join(root, script), root]);
-        let timer;
-        try {
-          const exit = await Promise.race([process.finished, new Promise((_, reject) => {
-            timer = win.setTimeout(() => {
-              try { process.proc.kill(); } catch {}
-              reject(new Error('Local speech setup timed out'));
-            }, 15 * 60 * 1000);
-          })]);
-          if (exit !== 0 || !await io.exists(join(root, 'ready.json'))) {
-            throw new Error('Local speech installation failed; check the model download connection');
-          }
-        } finally { win.clearTimeout(timer); }
-      })().catch((error) => { zotero.__irisSpeechSetup = null; throw error; });
-    }
-    return zotero.__irisSpeechSetup;
+        await copyResource('iris-speech.py'); await copyResource(script);
+      },
+      launch: () => zotero.isWin
+        ? launch('C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
+          ['-NoProfile', '-NonInteractive', '-WindowStyle', 'Hidden', '-ExecutionPolicy', 'Bypass', '-File', join(root, script), '-Root', root])
+        : launch('/bin/sh', [join(root, script), root]),
+      stop: async child => {
+        // Stop the installer's download child before terminating the launcher.
+        const pid = child.proc.pid;
+        if (Number.isInteger(pid) && pid > 0) {
+          const killer = zotero.isWin
+            ? launch('C:\\Windows\\System32\\taskkill.exe', ['/PID', String(pid), '/T', '/F'])
+            : launch('/usr/bin/pkill', ['-TERM', '-P', String(pid)]);
+          await killer.finished.catch(() => {});
+          try { if (child.proc.isRunning) child.proc.kill(); } catch {}
+        } else { try { child.proc.kill(); } catch {} }
+      }
+    });
+  };
+  const beginInstallation = async () => {
+    const ok = await installRuntime();
+    if (ok && inputSection.isConnected) announce(message('本地语音已就绪，点击麦克风开始录音', 'Local voice is ready. Click the mic to record.'));
+    return ok;
   };
   const clean = async (job) => {
     for (const file of Object.values(job.files || {})) {
@@ -91,7 +137,7 @@ function installIrisLocalVoice({ doc, inputBox, inputSection, voiceBtn, voiceCan
         inputBox.setRangeText((before && !/\s$/.test(before) ? ' ' : '') + text, start, end, 'end');
         emitInput();
         announce(message('本地语音识别完成', 'Local voice recognition complete'));
-      } else if (!job.cancelled) {
+      } else if (!job.cancelled && !result?.cancelled) {
         const error = result?.error || 'No speech detected';
         announce(message('本地语音识别未完成：', 'Local recognition did not complete: ') + error, 'error');
       }
@@ -138,7 +184,13 @@ function installIrisLocalVoice({ doc, inputBox, inputSection, voiceBtn, voiceCan
     render('preparing');
     announce(message('正在准备本地语音…', 'Preparing local voice input…'));
     try {
-      await ensureRuntime();
+      if (!await runtime.check()) {
+        const cancelled = job.cancelled || !inputSection.isConnected;
+        await finish(job, { cancelled: true });
+        if (!cancelled) await beginInstallation();
+        return;
+      }
+      await copyResource('iris-speech.py');
       if (job.cancelled || job.stopRequested || !inputSection.isConnected) {
         await finish(job, { error: 'Recording was not started' });
         return;
@@ -158,6 +210,8 @@ function installIrisLocalVoice({ doc, inputBox, inputSection, voiceBtn, voiceCan
   const stopAndWait = async () => {
     const job = active;
     if (!job) return false;
+    if (job.stopRequested) return job.completion;
+    if (!job.files) { await cancel(); return false; }
     job.stopRequested = true;
     render('transcribing');
     announce(message('正在本地识别中英文…', 'Recognizing speech locally…'));
@@ -179,8 +233,19 @@ function installIrisLocalVoice({ doc, inputBox, inputSection, voiceBtn, voiceCan
     await finish(job, { cancelled: true });
     announce(message('已取消本次语音输入', 'Voice input cancelled'));
   };
-  voiceBtn.addEventListener('click', () => { void (active ? stopAndWait() : start()); });
+  const unsubscribe = runtime.subscribe(renderRuntime, inputSection);
+  voiceBtn.addEventListener('click', () => {
+    if (voiceBtn.disabled) return;
+    if (active) { void stopAndWait(); return; }
+    if (runtime.snapshot().phase !== 'ready') {
+      void beginInstallation();
+      return;
+    }
+    void start();
+  });
   voiceCancelBtn.addEventListener('click', () => { void cancel(); });
-  win.addEventListener('unload', () => { void cancel(); }, { once: true });
-  inputSection.__irisVoiceController = { isActive: () => Boolean(active), stopAndWait, cancel };
+  win.addEventListener('unload', () => { unsubscribe(); void cancel(); }, { once: true });
+  inputSection.__irisVoiceController = { isActive: () => Boolean(active), stopAndWait, cancel, runtimeState: runtime.snapshot, refreshLanguage: renderRuntime };
+  if (typeof getIrisLanguage === 'function') getIrisLanguage().subscribe(renderRuntime, inputSection);
+  if (runtime.snapshot().phase !== 'installing') void runtime.check();
 }

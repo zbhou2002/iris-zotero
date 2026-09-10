@@ -9763,3 +9763,30 @@ button.llm-paper-context-summary-trigger.llm-history-context-trigger {
 }
 .llm-panel .iris-quote-remove:hover { background: color-mix(in srgb, currentColor 8%, transparent) !important; opacity: 1; }
 .llm-panel .iris-quote-remove:focus-visible { outline: 2px solid var(--color-accent, Highlight); outline-offset: 1px; }
+
+/* Installation is not recording: the mic is visibly unavailable until ready. */
+.llm-panel #llm-voice-input[data-voice-runtime="missing"],
+.llm-panel #llm-voice-input[data-voice-runtime="error"] {
+  color: var(--fill-secondary) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #b7791f 65%, transparent) !important;
+}
+.llm-panel #llm-voice-input[data-voice-runtime="installing"],
+.llm-panel #llm-voice-input[data-voice-runtime="checking"] {
+  opacity: .35 !important;
+  cursor: not-allowed !important;
+  animation: none !important;
+}
+.llm-panel .iris-voice-install-status {
+  flex: 0 0 auto;
+  margin: 4px 10px 7px;
+  max-width: 100%;
+  font: inherit;
+  font-size: var(--llm-fs-11, 11px);
+  line-height: 1.4;
+  color: var(--fill-secondary);
+  overflow-wrap: anywhere;
+  max-height: 5.6em;
+  overflow-y: auto;
+}
+.llm-panel .iris-voice-install-status[hidden] { display: none !important; }
+.llm-panel .iris-voice-install-status[data-phase="error"] { color: var(--fill-primary); }

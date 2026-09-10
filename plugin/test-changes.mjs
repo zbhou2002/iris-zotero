@@ -3,6 +3,7 @@ import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { voiceHarness } from './fixtures/voice-harness.mjs';
 const read = name => fs.readFileSync(new URL(name, import.meta.url), 'utf8');
 const tick = () => new Promise(resolve => setTimeout(resolve, 20));
 
@@ -26,49 +27,6 @@ test('send: double activation waits once; preserves the sending button state', a
   assert.equal(sends, 1);
   assert.equal(sendBtn.disabled, true);
 });
-
-function voiceHarness() {
-  const files = new Map([['/speech/venv/Scripts/python.exe', 'python'], ['/speech/ready.json', '{}']]);
-  const classList = () => ({ values: new Set(), toggle(name, yes) { yes ? this.values.add(name) : this.values.delete(name); } });
-  const button = () => ({ classList: classList(), parentElement: { style: {} },
-    listeners: {}, addEventListener(name, fn) { this.listeners[name] = fn; } });
-  const voiceBtn = button(), voiceCancelBtn = button();
-  const inputBox = { value: 'draft', selectionStart: 5, selectionEnd: 5, dispatchEvent() {},
-    setRangeText(text, start, end) { this.value = this.value.slice(0, start) + text + this.value.slice(end); } };
-  const inputSection = { isConnected: true };
-  const statuses = [], processes = [];
-  const win = { Event: class {}, setTimeout(fn, delay) { return setTimeout(fn, Math.min(delay, 2)); },
-    clearTimeout, addEventListener() {}, fetch: async () => ({ ok: true, text: async () => '# offline helper' }) };
-  const components = { interfaces: {}, classes: {
-    '@mozilla.org/file/local;1': { createInstance: () => ({ initWithPath() {} }) },
-    '@mozilla.org/process/util;1': { createInstance: () => {
-      const proc = { init() {}, exitValue: 0, isRunning: false,
-        runwAsync(args, length, observer) {
-          this.isRunning = true; this.observer = observer;
-          this.job = JSON.parse(files.get(args.at(-1)));
-          files.set(this.job.status, JSON.stringify({ stage: 'listening' }));
-          processes.push(this);
-        },
-        complete(text) {
-          files.set(this.job.done, JSON.stringify({ ok: true, text }));
-          this.isRunning = false;
-          this.observer.observe(null, 'process-finished');
-        },
-        kill() { this.isRunning = false; this.observer.observe(null, 'process-finished'); }
-      }; return proc;
-    } }
-  } };
-  const context = vm.createContext({});
-  vm.runInContext(read('src/content/scripts/iris-local-voice.js'), context);
-  context.installIrisLocalVoice({ doc: { defaultView: win }, inputBox, inputSection, voiceBtn, voiceCancelBtn,
-    announce: text => statuses.push(text), isChinese: () => true, root: '/speech',
-    io: { exists: async p => files.has(p), writeUTF8: async (p, data) => { files.set(p, data); },
-      readUTF8: async p => files.get(p), makeDirectory: async () => {}, remove: async p => { files.delete(p); } },
-    paths: { join: (...p) => p.join('/') }, components, zotero: { isWin: true } });
-  return { inputBox, inputSection, voiceBtn, voiceCancelBtn, files, statuses, processes,
-    start: async () => { voiceBtn.listeners.click(); await tick(); },
-    controller: inputSection.__irisVoiceController };
-}
 
 test('voice: stop-and-send waits for local text; subsequent sessions work', async () => {
   const h = voiceHarness();
@@ -114,6 +72,7 @@ test('voice: second mic click ends recording without sending', async () => {
 
 test('voice: cancel during startup never launches the recorder', async () => {
   const h = voiceHarness();
+  await tick();
   h.voiceBtn.listeners.click();
   await h.controller.cancel();
   await tick();

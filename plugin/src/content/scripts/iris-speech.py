@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import sys
 import time
+import threading
 
 VERSION = 1
 
@@ -33,15 +34,84 @@ def load_model(root):
                         cpu_threads=min(8, os.cpu_count() or 4), local_files_only=True)
 
 
+def model_progress_class(root, base, total_bytes):
+    """Observe Hub's reconstructed bytes, including resumed bytes, not file sizes.
+
+    The pinned Hub version supplies separate network and reconstruction bars.
+    Count only the latter to avoid counting each byte twice. A metadata dry run
+    provides the fixed total; the bar's evolving partial total is never used.
+    """
+    lock = threading.RLock()
+    last_write = [0.0]
+
+    class ModelProgress(base):
+        enabled = True
+        def __init__(self, *args, **kwargs):
+            self.report_model = kwargs.get('unit') == 'B' and kwargs.get('desc', '').startswith('Reconstructing')
+            kwargs['disable'] = False
+            super().__init__(*args, **kwargs)
+
+        def display(self, *args, **kwargs):
+            pass  # No terminal output; the Zotero composer owns the progress UI.
+
+        def update(self, n=1):
+            with lock:
+                result = super().update(n)
+                if self.report_model and time.monotonic() - last_write[0] >= 0.25:
+                    self.report()
+                return result
+
+        def report(self):
+            if not self.enabled:
+                return
+            count = max(0, int(self.n))
+            # If metadata changed or a retry reports extra bytes, stay truthful:
+            # show bytes without a percentage instead of clamping a fake 100%.
+            total = total_bytes if total_bytes and count <= total_bytes else None
+            write_json(root / 'setup-progress.json', {
+                'stage': 'model', 'downloadedBytes': count, 'totalBytes': total})
+            last_write[0] = time.monotonic()
+
+        def close(self):
+            with lock:
+                if self.report_model and hasattr(self, 'n'):
+                    self.report()
+                super().close()
+
+    return ModelProgress
+
+
 def setup(root):
     os.environ['HF_HUB_DISABLE_TELEMETRY'] = '1'
     os.environ['HF_HUB_DISABLE_IMPLICIT_TOKEN'] = '1'
-    from faster_whisper.utils import download_model
-    download_model('small', output_dir=str(root / 'model'))
+    from huggingface_hub import snapshot_download
+    from tqdm.auto import tqdm
+    write_json(root / 'setup-progress.json', {'stage': 'model'})
+    options = dict(repo_id='Systran/faster-whisper-small', local_dir=str(root / 'model'),
+                   token=False, allow_patterns=['config.json', 'preprocessor_config.json',
+                                                'model.bin', 'tokenizer.json', 'vocabulary.*'])
+    class SilentProgress(tqdm):
+        def display(self, *args, **kwargs):
+            pass
+    metadata = snapshot_download(**options, dry_run=True, tqdm_class=SilentProgress)
+    # Pin both passes to the same snapshot, even if upstream changes mid-setup.
+    if metadata:
+        options['revision'] = metadata[0].commit_hash
+    pending = [entry.file_size for entry in metadata if entry.will_download]
+    total = sum(pending) if pending and all(isinstance(size, int) and size > 0 for size in pending) else None
+    write_json(root / 'setup-progress.json', {'stage': 'model', 'downloadedBytes': 0, 'totalBytes': total})
+    progress = model_progress_class(root, tqdm, total)
+    try:
+        snapshot_download(**options, tqdm_class=progress)
+    finally:
+        progress.enabled = False
+    write_json(root / 'setup-progress.json', {'stage': 'verify'})
     disable_network()
     load_model(root)
     import sounddevice
-    write_json(root / 'ready.json', {'version': VERSION, 'model': 'small', 'offline': True})
+    files = {name: (root / 'model' / name).stat().st_size
+             for name in ('model.bin', 'config.json', 'tokenizer.json')}
+    write_json(root / 'ready.json', {'version': VERSION, 'model': 'small', 'offline': True, 'files': files})
     print('Local multilingual speech model ready', flush=True)
 
 
@@ -121,7 +191,11 @@ def main():
     args = parser.parse_args()
     args.root.mkdir(parents=True, exist_ok=True)
     if args.command == 'setup':
-        setup(args.root)
+        try:
+            setup(args.root)
+        except Exception as error:
+            (args.root / 'setup-error.txt').write_text(str(error), encoding='utf-8')
+            raise
     elif args.command == 'probe':
         disable_network()
         model = load_model(args.root)

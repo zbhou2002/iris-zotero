@@ -104,7 +104,8 @@ replaceOnce('    if (enabled) {\n      paneParent.scrollTop = pane.offsetTop;', 
 replaceOnce('        paneParent.scrollTop = pane.offsetTop;', `        if (!pane.isConnected || !pane.classList.contains('llm-reader-focus-pane')) return;
         pane.querySelector('.llm-panel')?.__irisRestoreView?.();
         paneParent.scrollTop = pane.offsetTop;`);
-const voice = fs.readFileSync(path.join(root, 'src/content/scripts/iris-local-voice.js'), 'utf8');
+const voice = fs.readFileSync(path.join(root, 'src/content/scripts/iris-speech-runtime.js'), 'utf8') + '\n' +
+  fs.readFileSync(path.join(root, 'src/content/scripts/iris-local-voice.js'), 'utf8');
 replaceRange('    const launchWindowsDictation = () => {', '    const sendSlot = createElement',
   voice + `\n    installIrisLocalVoice({ doc, inputBox, inputSection, voiceBtn, voiceCancelBtn,
       announce: announceVoiceStatus, isChinese: () => getPanelLang().startsWith('zh'),
