@@ -1,62 +1,119 @@
-![Iris — Read what matters.](docs/assets/iris-hero-en.png)
+<p align="center">
+  <a href="#english">English</a> · <a href="#简体中文">简体中文</a>
+</p>
+
+<a id="english"></a>
+
+![Iris — Read what matters. Passage questions, selection translation, local voice input, focused design and paper essence.](docs/assets/iris-product-en.svg)
 
 # Iris for Zotero
 
-A quiet, focused research assistant for Zotero. Ask questions about your paper, translate a selection when you choose, and highlight passages that explain why a paper is worth reading.
+### Your next good question starts inside the paper.
 
-[Download the latest release](https://github.com/zbhou2002/iris-zotero/releases/latest) · [中文说明](docs/README.zh-CN.md) · [Report an issue](https://github.com/zbhou2002/iris-zotero/issues)
+A focused AI reading companion for Zotero. **Ask about the passage in front of you, translate what slows you down, speak a question while it is fresh, and bring the paper’s distinctive contributions back into view.** All from your reading sidebar.
 
-## Read with less friction
+**[Download Iris →](https://github.com/zbhou2002/iris-zotero/releases/latest)** &nbsp; · &nbsp; [Get started](#start-reading-with-iris) &nbsp; · &nbsp; [简体中文 ↓](#简体中文)
 
-- **Ask your paper.** The current PDF provides text context automatically. Keep conversations and drafts in a focused sidebar.
-- **Ask about a passage.** With Iris open, select text in the PDF to attach a small “Quoted passage” chip above the composer. The paper title is available on hover; the passage itself is not displayed in the input area. Your question stays separate. On send, the quote is the focus, while the full paper remains background context. A new selection replaces the unsent quote; × removes it. Dismissing the PDF selection popup leaves the draft quote attached. Selecting alone never calls the model.
-- **Translate on demand.** Select text, then click Translate. Selecting text alone does not start a model request.
-- **Highlight the essence.** Ask the model to identify distinctive contributions and supporting evidence, then map selected passages to Zotero PDF highlights. Edit the selection prompt in Settings. There is no fixed sentence quota.
-- **Dictate locally.** Multilingual speech transcription runs locally after the optional runtime and model download. Stop to insert text, send to transcribe and send, or cancel to discard the current recording. No transcription API key is required.
-- **Choose your language.** Follow your system language, or choose English / 简体中文 in Settings. Changes apply immediately, without restarting or clearing your drafts and conversations.
+### Your AI. Your way.
 
-The hero above is an editorial illustration, not an application screenshot. Iris is an independent community fork of [AIdea](https://github.com/Visterainer/aidea-zotero), not an official Zotero, Apple, or OpenAI product.
+**Already use Codex? Connect through its supported account sign-in—no separate API key to enter.** Iris can bridge an existing Codex CLI OAuth login into your reading workflow. Prefer your own model service? Use an API endpoint, model and key when required. Choose **Account** or **API service** in Settings.
 
-## Install
+Account access follows your provider’s plan, available models and usage limits. It does not turn a subscription into unlimited API access.
 
-1. Download `Iris-<version>.xpi` from [Releases](https://github.com/zbhou2002/iris-zotero/releases/latest).
-2. In Zotero, open **Tools → Plugins** (called **Add-ons** in some versions).
-3. Choose the gear menu → **Install Add-on From File…**, select the XPI, and restart Zotero.
-4. Open a PDF and select Iris in the reader sidebar. Use the gear in Iris to connect your model service.
+### Five reasons to make room for Iris
 
-**Upgrading from AIdea or an earlier local Iris build:** install the XPI over the existing addon; do not uninstall first. Iris keeps the existing `aidea@visterainer` addon ID and preference namespace to preserve the migration path. Iris and AIdea therefore cannot be installed side by side. Back up your Zotero profile before migrating.
+| | A better way to stay with the paper |
+| :-- | :-- |
+| **01 · Quote a passage. Ask a sharper question.** | Select a passage in your PDF and attach it to your question. Iris focuses on that passage while keeping the paper as background context. Ask “Why does this follow?” without copying a paragraph into another app. |
+| **02 · Translate the part that stops you.** | Select text and choose Translate. Get help with a difficult sentence or unfamiliar wording, right where you are reading. You choose when translation starts. |
+| **03 · Speak the thought before it slips away.** | Dictate a question in Chinese, English or a mix of both. Local Whisper transcription turns your voice into text for the conversation. No separate transcription API key. |
+| **04 · Less interface. More room to think.** | A clean sidebar, compact passage references and a simple composer keep attention on the paper. English and 简体中文 switch instantly. No preset prompt-button row. |
+| **05 · Find the contribution—and its evidence.** | The rainbow highlight button opens Paper Essence, which selects passages about distinctive contributions and their supporting evidence, then highlights them in the original PDF. Adjust the selection criteria to the way you read. |
 
-After this first formal installation, Zotero can retrieve future Iris releases through its addon updater. Copying an XPI directly into the profile folder may not update Zotero's registered addon metadata; use the plugin manager for the initial migration. Automatic updates also depend on Zotero's update preferences and GitHub network access.
+### From “this sentence…” to your next insight
 
-## Compatibility and setup
+**Select a passage → ask or dictate a question → explore it with the paper in context.**
 
-The package declares Zotero **7–9** compatibility. Runtime checks have been performed on **Windows and Apple Silicon macOS with Zotero 9.0.6**; other Zotero versions and Intel Macs have not been fully validated. One XPI supports both platforms; the Mac microphone helper contains arm64 and x86_64 binaries. Optional local dictation includes Windows and macOS setup scripts; Linux automatic speech setup is not currently provided. Microphone access and a successful local runtime/model installation are still required.
+Translate when language gets in the way. Use Paper Essence to return to the source passages that deserve a closer look.
 
-Chat, translation, and AI highlights use the model provider you select. They are **not offline** just because dictation is local, and a provider account or API credentials may be required. Model accuracy, provider availability, and response time vary. Highlights are reading aids, not an objective ranking or a substitute for checking the paper. Scanned PDFs without usable text may need OCR first.
+### Start reading with Iris
 
-Dictation's first setup downloads Python dependencies and a Whisper model and can take time and disk space. Once setup is complete, the transcription helper blocks network access during recognition. Sending the resulting text as a chat message still sends that text to the selected model provider.
+1. Download **`Iris-<version>.xpi`** from [Releases](https://github.com/zbhou2002/iris-zotero/releases/latest).
+2. In Zotero: **Tools → Plugins → ⚙ → Install Add-on From File…** Select the XPI and restart Zotero.
+3. Open a PDF, choose Iris in the sidebar, and connect your preferred model service in Settings.
 
-The mic checks local files when a composer opens and before each recording. If setup is missing or incomplete, click the outlined mic to install. While installing, the mic is gray and disabled; typing and chat remain available. The composer shows the current stage and elapsed time, or actual model-download bytes and a percentage when the total is known (including resumed bytes; not a timer-based estimate). Model verification must finish before recording is enabled. Click again to record; installation never starts recording automatically. Failed setup displays a reason and allows a deliberate retry. All panels share one installation, including when you switch settings or reopen the sidebar. Automatic setup currently has a 30-minute timeout; slow or interrupted connections may require retrying.
+**Windows + macOS · English + 简体中文 · Zotero 7–9 declared compatibility.** See the [setup guide](docs/GUIDE.md) for tested environments and optional voice setup.
 
-On macOS, dictation runs through the bundled **Iris Voice** helper so macOS can display its own microphone permission prompt. Allow **Iris Voice** in **System Settings → Privacy & Security → Microphone**. If access is denied, Iris shows a persistent explanation and you can retry after enabling it. The helper needs microphone access only; local Whisper transcription does not require Apple's Speech Recognition permission, Accessibility, or Full Disk Access. Iris does not modify Zotero.app or reset system permissions. The first recording click installs the bundled helper into the speech runtime folder; no Xcode or Homebrew is needed. If a later helper update changes its signature, macOS may ask for consent again.
+<details>
+<summary>A few things to know before your first conversation</summary>
 
-## Build from source
+- Chat, translation and Paper Essence use your selected model provider; use a supported account login or your own API credentials. Relevant text is sent to that provider.
+- Voice input needs a one-time runtime/model download and microphone permission. Recognition then runs locally. Sending the transcript to chat sends its text to your selected provider. This is speech-to-text input, not spoken AI replies.
+- AI highlights are a reading aid. Check the source when evaluating a claim. Scanned PDFs may need OCR.
+- Tested environments include Windows and Apple Silicon macOS with Zotero 9.0.6. Intel Macs and other declared Zotero versions have not been fully validated; Linux has no automatic speech setup.
 
-Requires Node.js 22+ and Python 3.12+. The Iris packaging path uses only their standard libraries; no npm install is needed.
+</details>
 
-```sh
-npm run check
-python plugin/test-speech-progress.py
-sh scripts/build-macos-voice.sh  # macOS only; CI builds the universal helper
-python scripts/package.py
-```
+[Installation, updates & permissions](docs/GUIDE.md) · [Feedback & ideas](https://github.com/zbhou2002/iris-zotero/issues)
 
-Packaging requires the helper archive built on macOS (or downloaded from the matching CI build).
+---
 
-The installer, update manifest, and checksum are written to `dist/`. The patch-based source layout and original upstream source are documented in [PROVENANCE](docs/PROVENANCE.md). See [CONTRIBUTING](CONTRIBUTING.md) for the release procedure.
+<a id="简体中文"></a>
 
-## Privacy and license
+![Iris — 读懂关键之处。引用文段、划词翻译、本地语音输入、简洁界面与文献精华筛选。](docs/assets/iris-product-zh.svg)
 
-Only source code, distributable assets, tests, and documentation belong in this repository. Zotero libraries, PDFs, conversations, recordings, credentials, and local runtime caches are not included. Review your model provider's data policy before sending paper text. Do not attach personal profiles or unredacted logs to public issues.
+# Iris · 专注论文阅读
 
-Iris retains the upstream **AGPL-3.0-or-later** license; see [LICENSE](LICENSE), [third-party notices](THIRD_PARTY_NOTICES.md), and [provenance](docs/PROVENANCE.md). All original notices are retained. System fonts are used; proprietary OpenAI font files are not redistributed.
+### 好问题，就在读到这一段的时候发生。
+
+Iris 是陪你留在论文里的 AI 阅读助手。**选中文段就能追问，难懂的原文就地翻译，想到的问题直接说出来，独特贡献与关键证据回到原文中高亮。** 阅读、提问和思考，在 Zotero 侧栏里接着发生。
+
+**[下载 Iris →](https://github.com/zbhou2002/iris-zotero/releases/latest)** &nbsp; · &nbsp; [安装与使用](docs/README.zh-CN.md) &nbsp; · &nbsp; [English ↑](#english)
+
+### 订阅也好，API 也好，用你自己的 AI。
+
+**已经在用 Codex？通过支持的账号登录方式接入，不必再填一把 API Key。** Iris 可以桥接 Codex CLI 的已有 OAuth 登录，让你在论文旁使用账号可用的模型；也支持配置自己的 API 地址、模型和所需密钥。在设置中选择 **账号连接** 或 **API 服务** 即可。
+
+账号方式仍遵循服务商的订阅权限、可用模型与用量限制，并不代表无限额度。
+
+### 值得把它装进 Zotero 的五个理由
+
+| | 让阅读更顺手，也更深入 |
+| :-- | :-- |
+| **01 · 引用这一段，把问题问到点上。** | 在 PDF 中选中文段，附上你的问题。Iris 聚焦这段内容，同时保留全文作为背景。问一句“这里为什么能得出这个结论？”，不用来回复制、切换窗口。 |
+| **02 · 卡住你的那句话，就地读懂。** | 选中原文，点击翻译。处理难句和陌生表达时，把注意力留在正在读的位置。是否翻译，由你决定。 |
+| **03 · 想到了，就说出来。** | 用中文、英文或中英混合表达问题，Whisper 在本机转写为对话文字。少打一点字，留住阅读时一闪而过的想法，无需额外的转写 API Key。 |
+| **04 · 更清爽，也更专注。** | 简洁侧栏、小巧的引用标签与干净的输入区，让空间回到论文和思考。中英文界面即时切换；去掉预设提问按钮，让你自己决定问什么。 |
+| **05 · 抓住贡献，也找到依据。** | 醒目的彩虹“highlight”按钮，筛选独特贡献与支撑证据，并直接高亮到 PDF 原文。你也可以调整筛选标准，让它更贴合自己的阅读重点。 |
+
+### 从“这一句……”开始，顺着问题读下去
+
+**选中文段 → 输入或说出问题 → 结合全文继续追问。**
+
+遇到语言障碍时按需翻译；想回看论文的关键之处，就让文献精华帮你标出值得细读的原文。
+
+### 三步开始
+
+1. 在 [Releases](https://github.com/zbhou2002/iris-zotero/releases/latest) 下载 **`Iris-<版本>.xpi`**。
+2. Zotero → **工具 → 插件 → ⚙ → 从文件安装**，选择安装包后重启 Zotero。
+3. 打开 PDF，进入 Iris 侧栏，在设置中连接你使用的模型服务。
+
+**Windows 与 macOS · 中英文界面 · 安装包声明支持 Zotero 7–9。** 实测环境及语音配置见[使用说明](docs/README.zh-CN.md)。
+
+<details>
+<summary>开始前，了解这几件事</summary>
+
+- 对话、翻译和文献精华使用你选择的模型服务，可选支持的账号登录或自有 API 凭据，相关文本会发送给该服务商。
+- 语音首次使用需要下载运行环境与模型，并允许麦克风。之后在本机识别；作为对话发送时，转写文字仍会发送给所选模型。当前是语音转文字输入，不是 AI 语音朗读回复。
+- 精华高亮是阅读辅助，重要结论请回到原文核对；扫描版 PDF 可能需要先 OCR。
+- 已测试 Windows 和 Apple Silicon Mac / Zotero 9.0.6。Intel Mac 和其他声明支持的 Zotero 版本尚未全面验证；Linux 暂无自动语音安装。
+
+</details>
+
+[安装、更新与权限说明](docs/README.zh-CN.md) · [反馈问题或建议](https://github.com/zbhou2002/iris-zotero/issues)
+
+---
+
+<sub>Product illustrations show conceptual workflows, not application screenshots. / 海报为功能概念示意，非应用截图。</sub>
+
+<sub>Open source under [AGPL-3.0-or-later](LICENSE). Iris builds on [AIdea](https://github.com/Visterainer/aidea-zotero) and its upstream contributors; original notices are retained. [Acknowledgments & licenses](THIRD_PARTY_NOTICES.md) · [Source provenance](docs/PROVENANCE.md) · [Contributing](CONTRIBUTING.md). Independent community project; not affiliated with Zotero or model providers.</sub>

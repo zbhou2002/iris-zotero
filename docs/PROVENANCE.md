@@ -21,3 +21,7 @@ This is a transitional patch-based fork, not a clean upstream TypeScript refacto
 - Local speech setup downloads uv, Python, faster-whisper, sounddevice, and a Whisper model from their upstream sources. Those runtime downloads are not included in the XPI or this repository and retain their respective licenses.
 
 The legacy addon ID and `aidea` namespace are retained for compatibility and do not imply that Iris releases are published by the upstream AIdea author.
+
+- `docs/assets/iris-product-en.svg` and `iris-product-zh.svg` are original vector promotional illustrations created for Iris. They depict conceptual workflows, not application screenshots, and contain no third-party paper text or customer data.
+
+- `plugin/src/content/icons/iris-rainbow-highlight.svg` is original vector UI artwork for Iris: a compact horizontal rainbow highlighter mark with a simplified pen tip. The design followed concept exploration with built-in ImageGen; no third-party logo or source image is included.
