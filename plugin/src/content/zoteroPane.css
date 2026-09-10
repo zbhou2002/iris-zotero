@@ -9790,3 +9790,15 @@ button.llm-paper-context-summary-trigger.llm-history-context-trigger {
 }
 .llm-panel .iris-voice-install-status[hidden] { display: none !important; }
 .llm-panel .iris-voice-install-status[data-phase="error"] { color: var(--fill-primary); }
+
+/* Reserve complete hit targets; only the model label may shrink in a narrow pane. */
+.llm-panel .llm-actions { flex-wrap: wrap; row-gap: 6px; }
+.llm-panel .llm-actions-left { flex: 1 1 70px; }
+.llm-panel .llm-actions-right { flex: 0 0 auto; margin-inline-start: auto; }
+.llm-panel .llm-actions-right .llm-action-slot { flex: 0 0 30px; min-width: 30px; }
+.llm-panel .llm-action-slot.llm-model-dropdown { flex: 0 1 auto; max-width: 100%; }
+.llm-panel .llm-action-slot.llm-model-dropdown > .llm-model-btn {
+  flex: 0 1 auto; min-width: 0 !important; max-width: 100% !important;
+}
+.llm-panel .llm-actions button { margin: 0; }
+.llm-panel .llm-voice-cancel-btn:focus-visible { outline: 2px solid var(--color-accent, Highlight); outline-offset: -2px; }
