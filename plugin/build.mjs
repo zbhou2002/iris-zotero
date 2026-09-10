@@ -195,6 +195,8 @@ replaceOnce('    container.appendChild(statusLine);', `    container.appendChild
         : (zh ? '无法打开链接，请检查系统默认浏览器。' : 'Could not open the link. Check your default browser.');
       setStatus(statusLine, message, 'error'); statusLine.title = message;
     } });`);
+// Omit the preset prompt row entirely; renderShortcuts already exits when absent.
+replaceOnce('    const shortcutsRow = createElement(doc, "div", "llm-shortcuts", {\n      id: "llm-shortcuts"\n    });', '');
 const essenceAnchor = '    discussionBottom.append(shortcutsRow, inputSection);';
 if (!text.includes(essenceAnchor)) throw new Error('Missing essence toolbar anchor');
 text = text.replace(essenceAnchor, `
@@ -205,7 +207,7 @@ text = text.replace(essenceAnchor, `
       setStatus(statusLine, message, 'ready'); statusLine.title = message;
     } }); }
     catch (error) { ztoolkit.log('Iris essence toolbar', error); }
-    discussionBottom.append(shortcutsRow, inputSection);`);
+    discussionBottom.append(inputSection);`);
 new vm.Script(text);
 const promptSettingsAnchor = '    root.appendChild(selectionTranslateGroup);';
 if (!text.includes(promptSettingsAnchor)) throw new Error('Missing essence settings anchor');
