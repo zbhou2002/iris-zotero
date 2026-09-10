@@ -24,6 +24,15 @@ Iris 是基于 AIdea 修改的 Zotero 阅读助手：结合当前论文对话、
 
 精华高亮没有固定句数配额，筛选提示词可以在设置中修改。高亮是阅读辅助，不能保证客观或完整；没有可用文本的扫描 PDF 可能需要先 OCR。
 
-安装包声明兼容 Zotero 7–9，实际运行测试环境为 Windows / Zotero 9.0.6。macOS 安装及语音脚本尚未完成实机验证。Linux 暂无自动语音环境安装。
+安装包声明兼容 Zotero 7–9，实际运行测试环境为 Windows 及 Apple Silicon macOS / Zotero 9.0.6。Intel Mac 尚未完成实机验证。Linux 暂无自动语音环境安装。
 
 本项目基于 AIdea，保留 AGPL 许可和原作者信息。主页海报为宣传插画，不是程序截图。
+
+
+## macOS 语音权限（3.4.13 起）
+
+Mac 录音通过随插件提供的 **Iris Voice** 助手运行。首次使用时，请在 macOS 弹窗中允许麦克风；如果拒绝过，在 **系统设置 → 隐私与安全性 → 麦克风** 中开启 **Iris Voice** 后重试。Iris 会保留权限错误提示，不会自动重复弹窗。
+
+仅需要麦克风权限。Whisper 在本机转写，不需要 Apple 的语音识别、辅助功能或完全磁盘访问权限；插件不会修改 Zotero.app 或重置系统权限。助手同时包含 Apple Silicon 和 Intel 二进制，用户无需安装 Xcode 或 Homebrew。后续助手签名发生变化时，macOS 可能重新请求授权。
+
+已在 Apple Silicon Mac、Zotero 9.0.6 验证安装、窄侧栏按钮点击区域、真实麦克风访问及离线中文音频转写；Intel Mac 尚未实机验证。取消按钮现在与麦克风、发送按钮保持在同一组，窄面板中优先保留完整点击区域。

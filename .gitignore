@@ -9,3 +9,5 @@ __pycache__/
 /plugin/src/content/scripts/aidea.js
 *.log
 
+
+/plugin/src/content/scripts/iris-voice-macos/

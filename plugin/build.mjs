@@ -104,6 +104,11 @@ replaceOnce('    if (enabled) {\n      paneParent.scrollTop = pane.offsetTop;', 
 replaceOnce('        paneParent.scrollTop = pane.offsetTop;', `        if (!pane.isConnected || !pane.classList.contains('llm-reader-focus-pane')) return;
         pane.querySelector('.llm-panel')?.__irisRestoreView?.();
         paneParent.scrollTop = pane.offsetTop;`);
+// Keep recording controls together outside the clipped model-label group.
+replaceOnce('    actionsLeft.append(voiceCancelSlot, uploadSlot, modelDropdown);',
+  '    actionsLeft.append(uploadSlot, modelDropdown);');
+replaceOnce('    actionsRight.append(voiceSlot, sendSlot);',
+  '    actionsRight.append(voiceCancelSlot, voiceSlot, sendSlot);');
 const voice = fs.readFileSync(path.join(root, 'src/content/scripts/iris-speech-runtime.js'), 'utf8') + '\n' +
   fs.readFileSync(path.join(root, 'src/content/scripts/iris-local-voice.js'), 'utf8');
 replaceRange('    const launchWindowsDictation = () => {', '    const sendSlot = createElement',

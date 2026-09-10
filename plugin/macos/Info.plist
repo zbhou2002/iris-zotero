@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>CFBundleExecutable</key><string>IrisVoice</string>
+<key>CFBundleIdentifier</key><string>org.iris-zotero.voice</string>
+<key>CFBundleName</key><string>Iris Voice</string>
+<key>CFBundleDisplayName</key><string>Iris Voice</string>
+<key>CFBundleVersion</key><string>1</string>
+<key>CFBundlePackageType</key><string>APPL</string>
+<key>LSUIElement</key><true/>
+<key>LSMinimumSystemVersion</key><string>11.0</string>
+<key>NSMicrophoneUsageDescription</key><string>Iris records dictation and transcribes it locally on your Mac. Audio is not uploaded. Iris 将录音仅在本机转成文字，不上传音频。</string>
+</dict></plist>
