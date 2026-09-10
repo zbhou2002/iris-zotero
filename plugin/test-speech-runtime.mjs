@@ -34,7 +34,8 @@ test('Mac uses the shell installer and a POSIX Python path; helper line endings 
   assert.equal(h.installers[0].args[0], '/speech/iris-speech-setup.sh');
   assert.equal(h.files.get('/speech/iris-speech-setup.sh').includes('\r'), false);
   h.installFiles(); h.installers[0].exit(); await tick(); await h.start();
-  assert.equal(h.processes[0].path, '/speech/venv/bin/python'); await h.controller.cancel();
+  assert.equal(h.processes[0].path, '/usr/bin/open');
+  assert.deepEqual(Array.from(h.processes[0].args.slice(0, 5)), ['-n', '-g', '-W', '/speech/Iris Voice.app', '--args']); await h.controller.cancel();
 });
 
 test('each missing or empty model file blocks readiness even with a ready marker', async () => {
@@ -149,4 +150,35 @@ test('model progress is displayed as real bytes and percent, with unknown-total 
   assert.match(h.voiceBtn.title, /25% · 120.0 MB \/ 480.0 MB/);
   state = { ...state, totalBytes: null }; h.controller.refreshLanguage();
   assert.match(h.voiceBtn.title, /120.0 MB/); assert.equal(h.voiceBtn.title.includes('%'), false);
+});
+
+
+test('Mac denied permission remains visible, preserves the draft and permits retry', async () => {
+  const h = voiceHarness({ isWin: false }); await h.start();
+  const proc = h.processes[0];
+  h.files.set(proc.job.done, JSON.stringify({ ok: false, code: 'microphone_denied' })); proc.exit();
+  await tick();
+  assert.equal(h.controller.isActive(), false);
+  assert.equal(h.inputBox.value, 'draft');
+  assert.equal(h.inputSection.children[0].hidden, false);
+  assert.match(h.inputSection.children[0].textContent, /Iris Voice/);
+  assert.equal(h.voiceBtn.disabled, false);
+  await h.start(); assert.equal(h.processes.length, 2); await h.controller.cancel();
+});
+
+test('Mac cancellation waits for the helper instead of killing only its open launcher', async () => {
+  const h = voiceHarness({ isWin: false }); await h.start();
+  const proc = h.processes[0]; await h.controller.cancel();
+  assert.equal(proc.isRunning, false); assert.equal(proc.killed, undefined);
+  assert.equal(h.controller.isActive(), false); assert.equal(h.inputBox.value, 'draft');
+  assert.equal([...h.files.keys()].some(path => path.includes('/voice-')), false);
+});
+
+test('Mac permission prompt is a cancellable, non-listening state', async () => {
+  const h = voiceHarness({ isWin: false }); await h.start();
+  h.files.set(h.processes[0].job.status, JSON.stringify({ stage: 'permission' })); await tick();
+  assert.equal(h.voiceBtn.disabled, true);
+  assert.equal(h.voiceCancelBtn.parentElement.style.display, '');
+  assert.match(h.inputSection.children[0].textContent, /macOS/);
+  await h.controller.cancel();
 });
