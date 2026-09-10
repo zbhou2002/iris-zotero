@@ -9676,9 +9676,10 @@ button.llm-paper-context-summary-trigger.llm-history-context-trigger {
   }
 }
 
-/* Essence lives beside the Iris wordmark and shares the quiet header controls. */
+/* Essence keeps its header position and wears a rainbow highlighter stroke. */
 .llm-header-info:has(.iris-essence-actions) {
   display: flex;
+  flex-wrap: wrap;
   flex-direction: row;
   align-items: center;
   gap: 7px;
@@ -9709,6 +9710,40 @@ button.llm-paper-context-summary-trigger.llm-history-context-trigger {
   outline-offset: 1px;
 }
 .llm-panel .iris-essence-button:disabled { opacity: .4; cursor: default; }
+/* The brush is decorative; the complete rectangular button remains clickable. */
+.llm-panel #iris-highlight-essence {
+  position: relative;
+  isolation: isolate;
+  width: auto;
+  min-width: 98px;
+  height: 32px;
+  padding: 0 17px 0 3px;
+  gap: 5px;
+  border-radius: 8px;
+  background: transparent;
+  color: #30233f;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.llm-panel #iris-highlight-essence::before {
+  content: "";
+  position: absolute;
+  inset: -3px -2px;
+  z-index: -1;
+  pointer-events: none;
+  background: url("icons/iris-rainbow-highlight.svg") center / 100% 100% no-repeat;
+}
+.llm-panel #iris-highlight-essence > svg { width: 14px; height: 14px; flex-shrink: 0; }
+.llm-panel #iris-highlight-essence:hover:not(:disabled)::before { filter: saturate(1.3) brightness(1.03); }
+.llm-panel #iris-highlight-essence:active:not(:disabled)::before { transform: rotate(-1deg) scale(.97); }
+.llm-panel #iris-highlight-essence[aria-pressed="true"]::before { filter: saturate(.6); }
+.llm-panel #iris-highlight-essence:focus-visible { outline: 2px solid var(--color-accent, Highlight); outline-offset: 3px; }
+@media (forced-colors: active) {
+  .llm-panel #iris-highlight-essence { background: ButtonFace; color: ButtonText; border: 1px solid ButtonText; }
+  .llm-panel #iris-highlight-essence::before { display: none; }
+}
 .iris-essence-settings > summary { cursor: pointer; }
 .iris-essence-settings > textarea { color: inherit; background: transparent; }
 
@@ -9802,3 +9837,77 @@ button.llm-paper-context-summary-trigger.llm-history-context-trigger {
 }
 .llm-panel .llm-actions button { margin: 0; }
 .llm-panel .llm-voice-cancel-btn:focus-visible { outline: 2px solid var(--color-accent, Highlight); outline-offset: -2px; }
+
+/* Iris tactile chrome: quiet controls around the signature rainbow ink mark. */
+.llm-panel {
+  --iris-control-surface: color-mix(in srgb, var(--material-sidepane) 93%, var(--fill-primary) 7%);
+  --iris-soft-stroke: color-mix(in srgb, var(--fill-primary) 10%, transparent);
+  --iris-soft-shadow: 0 1px 2px rgba(25, 18, 45, .07), inset 0 1px 0 rgba(255, 255, 255, .15);
+}
+.llm-panel :is(.llm-history-new, .llm-history-toggle, .llm-settings-btn, .llm-voice-btn, .llm-voice-cancel-btn, .iris-essence-button, .llm-model-btn) {
+  transition: background-color 120ms ease, box-shadow 120ms ease, color 120ms ease;
+}
+.llm-panel :is(.llm-history-new, .llm-history-toggle, .llm-settings-btn) {
+  border-radius: 9px !important;
+}
+.llm-panel :is(.llm-history-new, .llm-history-toggle, .llm-settings-btn):hover:not(:disabled),
+.llm-panel .llm-settings-btn.active {
+  background: var(--iris-control-surface) !important;
+  box-shadow: var(--iris-soft-shadow) !important;
+  color: var(--fill-primary) !important;
+}
+.llm-panel .llm-input-section,
+.llm-panel[data-composer-theme-surface="true"] .llm-input-section {
+  border: 1px solid var(--iris-soft-stroke) !important;
+  border-radius: 15px !important;
+  background: linear-gradient(165deg, color-mix(in srgb, var(--material-sidepane) 97%, white), var(--material-sidepane)) !important;
+  box-shadow: 0 3px 12px rgba(25,18,45,.045), inset 0 1px 0 rgba(255,255,255,.13) !important;
+}
+.llm-panel .llm-input-section:focus-within,
+.llm-panel[data-composer-theme-surface="true"] .llm-input-section:focus-within {
+  border-color: color-mix(in srgb, var(--color-accent, #8a76b0) 45%, var(--material-sidepane)) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent, #8a76b0) 9%, transparent), 0 3px 12px rgba(25,18,45,.045) !important;
+}
+.llm-panel .iris-quote-card {
+  border-radius: 9px !important;
+  border-color: color-mix(in srgb, #9b83bb 23%, transparent) !important;
+  background: color-mix(in srgb, #b9a0d8 10%, var(--material-sidepane)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12) !important;
+}
+.llm-panel .llm-model-btn { border-radius: 8px !important; }
+.llm-panel .llm-model-btn:hover:not(:disabled) { background: var(--iris-control-surface) !important; }
+.llm-panel #llm-send:not(:disabled) {
+  background: linear-gradient(145deg, #9b85b9, #6b558b) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 5px rgba(86,61,115,.2), inset 0 1px 0 rgba(255,255,255,.25) !important;
+}
+.llm-panel #llm-send:hover:not(:disabled) { background: linear-gradient(145deg, #a28cbf, #766094) !important; }
+.llm-panel .llm-voice-btn:hover:not(:disabled) {
+  background: var(--iris-control-surface) !important;
+  box-shadow: var(--iris-soft-shadow) !important;
+}
+.llm-panel .llm-voice-btn.is-listening {
+  background: color-mix(in srgb, #e55b73 13%, var(--material-sidepane)) !important;
+  color: #d13f59 !important;
+}
+.llm-panel :is(.llm-history-new, .llm-history-toggle, .llm-settings-btn, .llm-voice-btn, .llm-model-btn, #llm-send, #llm-cancel):focus-visible {
+  outline: 2px solid var(--color-accent, Highlight) !important;
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .llm-panel :is(button, .llm-voice-btn.is-listening) { transition: none !important; animation: none !important; }
+}
+@media (forced-colors: active) {
+  .llm-panel .llm-input-section, .llm-panel .iris-quote-card { background: Canvas !important; border-color: CanvasText !important; box-shadow: none !important; }
+  .llm-panel #llm-send:not(:disabled) { background: ButtonFace !important; color: ButtonText !important; border: 1px solid ButtonText !important; box-shadow: none !important; }
+}
+
+.llm-panel #iris-highlight-essence .iris-essence-label { transform: translateY(3px); color: rgba(42, 32, 54, .78); font-weight: 500; font-size: 12px; letter-spacing: -.015em; }
+.llm-panel #iris-highlight-essence[aria-pressed="true"] > svg { transform: translateY(3px); }
+
+@media (forced-colors: active) { .llm-panel #iris-highlight-essence .iris-essence-label { color: ButtonText; } }
+/* At narrow widths, header actions wrap instead of covering the ink mark. */
+.llm-panel .llm-header-top:has(.iris-essence-actions) { display: flex; flex-wrap: wrap; row-gap: 4px; }
+.llm-panel .llm-header-info:has(.iris-essence-actions) { min-width: 0; }
+.llm-panel .llm-header-top:has(.iris-essence-actions) > .llm-header-actions { margin-left: auto; flex-shrink: 0; }
+.llm-panel #iris-highlight-essence { height: 32px !important; min-height: 32px !important; max-height: 32px !important; box-sizing: border-box; }
