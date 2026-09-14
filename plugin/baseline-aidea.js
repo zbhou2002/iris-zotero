@@ -21093,59 +21093,30 @@ ${textBlocks.join("\n\n")}`);
       }, intervalMs);
     };
   }
-  function createStreamingAutoScroller(chatBox, suspendScrollUpdates2, resumeScrollUpdates2, threshold = DEFAULT_AUTO_SCROLL_THRESHOLD) {
-    let _active = false;
-    if (chatBox) {
-      const distanceFromBottom = chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight;
-      _active = distanceFromBottom <= threshold;
-    }
+  function createStreamingAutoScroller(chatBox, suspendScrollUpdates2, resumeScrollUpdates2, conversationKey) {
     return {
-      get active() {
-        return _active;
-      },
       patchAndScroll(patchFn) {
         if (!chatBox) {
           patchFn();
           return;
         }
-        const distanceFromBottom = chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight;
-        if (distanceFromBottom > threshold) {
-          _active = false;
-        } else {
-          _active = true;
-        }
         suspendScrollUpdates2();
         try {
           patchFn();
         } finally {
-          if (_active) {
-            chatBox.scrollTop = chatBox.scrollHeight;
-          }
+          applyQuestionScrollAnchor(conversationKey, chatBox);
           Promise.resolve().then(resumeScrollUpdates2);
         }
-      },
-      onUserScroll() {
-        if (!chatBox) return;
-        const distanceFromBottom = chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight;
-        if (distanceFromBottom > threshold) {
-          _active = false;
-        } else {
-          _active = true;
-        }
-      },
-      reactivate() {
-        _active = true;
       }
     };
   }
-  var DEFAULT_PATCH_INTERVAL_MS, DEFAULT_AUTO_SCROLL_THRESHOLD;
+  var DEFAULT_PATCH_INTERVAL_MS;
   var init_streamingUpdate = __esm({
     "src/modules/contextPanel/streamingUpdate.ts"() {
       "use strict";
       init_markdown();
       init_textUtils();
       DEFAULT_PATCH_INTERVAL_MS = 30;
-      DEFAULT_AUTO_SCROLL_THRESHOLD = 64;
     }
   });
 
@@ -29004,6 +28975,78 @@ When answering questions:
       updatedAt: Date.now()
     };
   }
+  function isChatBoxConversation(chatBox, conversationKey) {
+    return chatBox.dataset.conversationKey === String(conversationKey);
+  }
+  function beginQuestionScrollAnchor(conversationKey, chatBox, questionMessageId) {
+    if (!chatBox) return;
+    if (!Number.isFinite(questionMessageId)) return;
+    questionScrollAnchors.set(chatBox, {
+      conversationKey,
+      questionMessageId,
+      phase: "following",
+      expectedScrollTop: null
+    });
+  }
+  function isQuestionScrollManual(conversationKey, chatBox) {
+    const anchor = questionScrollAnchors.get(chatBox);
+    return anchor?.conversationKey === conversationKey && anchor.phase === "manual";
+  }
+  function getQuestionScrollAnchorTop(chatBox, questionMessageId) {
+    const wrappers = Array.from(
+      chatBox.querySelectorAll(".llm-message-wrapper.user")
+    );
+    const questionWrapper = wrappers.find(
+      (wrapper) => wrapper.getAttribute("data-message-id") === String(questionMessageId)
+    );
+    if (!questionWrapper) return null;
+    if (typeof questionWrapper.getBoundingClientRect === "function" && typeof chatBox.getBoundingClientRect === "function") {
+      const questionRect = questionWrapper.getBoundingClientRect();
+      const chatRect = chatBox.getBoundingClientRect();
+      if (Number.isFinite(questionRect.top) && Number.isFinite(chatRect.top)) {
+        return Math.max(0, chatBox.scrollTop + questionRect.top - chatRect.top);
+      }
+    }
+    return Math.max(0, Number(questionWrapper.offsetTop) || 0);
+  }
+  function applyQuestionScrollAnchor(conversationKey, chatBox) {
+    const anchor = questionScrollAnchors.get(chatBox);
+    if (!anchor || anchor.conversationKey !== conversationKey || anchor.phase === "manual" || !isChatBoxConversation(chatBox, conversationKey) || !isChatViewportVisible(chatBox)) return false;
+    const questionTop = getQuestionScrollAnchorTop(
+      chatBox,
+      anchor.questionMessageId
+    );
+    if (questionTop === null) {
+      questionScrollAnchors.delete(chatBox);
+      return false;
+    }
+    const targetScrollTop = Math.min(questionTop, getMaxScrollTop(chatBox));
+    if (Math.abs(chatBox.scrollTop - targetScrollTop) > 1) {
+      anchor.expectedScrollTop = targetScrollTop;
+      chatBox.scrollTop = targetScrollTop;
+    }
+    if (targetScrollTop >= questionTop - 1) {
+      anchor.phase = "anchored";
+    }
+    return true;
+  }
+  function handleQuestionAnchorUserScroll(conversationKey, chatBox) {
+    const anchor = questionScrollAnchors.get(chatBox);
+    if (!anchor || anchor.conversationKey !== conversationKey) return false;
+    if (anchor.expectedScrollTop !== null && Math.abs(chatBox.scrollTop - anchor.expectedScrollTop) <= 1) {
+      anchor.expectedScrollTop = null;
+      return false;
+    }
+    anchor.phase = "manual";
+    anchor.expectedScrollTop = null;
+    return true;
+  }
+  function releaseQuestionScrollAnchor(conversationKey, chatBox) {
+    const anchor = questionScrollAnchors.get(chatBox);
+    if (!anchor || anchor.conversationKey !== conversationKey) return;
+    anchor.phase = "manual";
+    anchor.expectedScrollTop = null;
+  }
   function persistChatScrollSnapshotByKey(conversationKey, chatBox) {
     if (!isChatViewportVisible(chatBox)) return;
     chatScrollSnapshots.set(conversationKey, buildChatScrollSnapshot(chatBox));
@@ -29011,9 +29054,13 @@ When answering questions:
   function persistChatScrollSnapshot(item, chatBox) {
     persistChatScrollSnapshotByKey(getConversationKey(item), chatBox);
   }
-  function applyChatScrollSnapshot(chatBox, snapshot) {
+  function applyChatScrollSnapshot(chatBox, snapshot, conversationKey = null) {
     _scrollUpdatesSuspended = true;
-    if (snapshot.mode === "followBottom") {
+    if (conversationKey !== null && applyQuestionScrollAnchor(conversationKey, chatBox)) {
+      // The current turn owns the viewport until its question reaches the top.
+    } else if (conversationKey !== null && isQuestionScrollManual(conversationKey, chatBox)) {
+      chatBox.scrollTop = clampScrollTop(chatBox, snapshot.scrollTop);
+    } else if (snapshot.mode === "followBottom") {
       chatBox.scrollTop = chatBox.scrollHeight;
     } else {
       chatBox.scrollTop = clampScrollTop(chatBox, snapshot.scrollTop);
@@ -29037,7 +29084,11 @@ When answering questions:
     try {
       fn();
     } finally {
-      if (wasNearBottom) {
+      if (applyQuestionScrollAnchor(conversationKey, chatBox)) {
+        // Keep the current question fixed through re-renders and completion.
+      } else if (isQuestionScrollManual(conversationKey, chatBox)) {
+        chatBox.scrollTop = savedScrollTop;
+      } else if (wasNearBottom) {
         chatBox.scrollTop = chatBox.scrollHeight;
       } else if (restoreMode === "relative" && savedMaxScrollTop > 0) {
         const nextMaxScrollTop = getMaxScrollTop(chatBox);
@@ -29082,6 +29133,12 @@ When answering questions:
       }
     };
     const stickToBottomIfNeeded = () => {
+      if (!isChatBoxConversation(chatBox, conversationKey)) return;
+      if (applyQuestionScrollAnchor(conversationKey, chatBox)) {
+        persistChatScrollSnapshotByKey(conversationKey, chatBox);
+        return;
+      }
+      if (isQuestionScrollManual(conversationKey, chatBox)) return;
       const snapshot = chatScrollSnapshots.get(conversationKey);
       if (!snapshot || snapshot.mode !== "followBottom") return;
       if (!isChatViewportVisible(chatBox)) return;
@@ -29116,7 +29173,7 @@ When answering questions:
     }
     followBottomStabilizers.delete(conversationKey);
   }
-  var chatScrollSnapshots, followBottomStabilizers, _scrollUpdatesSuspended;
+  var chatScrollSnapshots, followBottomStabilizers, questionScrollAnchors, _scrollUpdatesSuspended;
   var init_chatScroll = __esm({
     "src/modules/contextPanel/chatScroll.ts"() {
       "use strict";
@@ -29124,6 +29181,7 @@ When answering questions:
       init_state();
       chatScrollSnapshots = /* @__PURE__ */ new Map();
       followBottomStabilizers = /* @__PURE__ */ new Map();
+      questionScrollAnchors = /* @__PURE__ */ new WeakMap();
       _scrollUpdatesSuspended = false;
     }
   });
@@ -37850,6 +37908,7 @@ ${zoneBSummary}`
     assistantMessage.messageId = assistantId;
     assistantMessage.parentMessageId = nextUserId;
     activeStreamingAssistantMessages.set(assistantId, assistantMessage);
+    beginQuestionScrollAnchor(conversationKey, ui.chatBox, nextUserId);
     await reloadActiveConversationPath(item, { forceContextRestore: true });
     refreshChatSafely();
     const persistAssistantUpdate = async () => {
@@ -37903,7 +37962,8 @@ ${zoneBSummary}`
       const editAutoScroller = createStreamingAutoScroller(
         ui.chatBox,
         suspendScrollUpdates,
-        resumeScrollUpdates
+        resumeScrollUpdates,
+        conversationKey
       );
       const queueEditPatch = createQueuedStreamingPatch(() => {
         editAutoScroller.patchAndScroll(() => {
@@ -38132,6 +38192,11 @@ ${zoneBSummary}`
     assistantMessage.messageId = assistantId;
     assistantMessage.parentMessageId = retryPair.userMessage.messageId;
     activeStreamingAssistantMessages.set(assistantId, assistantMessage);
+    beginQuestionScrollAnchor(
+      conversationKey,
+      ui.chatBox,
+      retryPair.userMessage.messageId
+    );
     await reloadActiveConversationPath(item, { forceContextRestore: true });
     refreshChatSafely();
     let streamedAnswer = "";
@@ -38210,7 +38275,8 @@ ${zoneBSummary}`
       const retryAutoScroller = createStreamingAutoScroller(
         ui.chatBox,
         suspendScrollUpdates,
-        resumeScrollUpdates
+        resumeScrollUpdates,
+        conversationKey
       );
       const queueRetryPatch = createQueuedStreamingPatch(() => {
         retryAutoScroller.patchAndScroll(() => {
@@ -38475,6 +38541,7 @@ ${zoneBSummary}`
       assistantMessage.parentMessageId = userMessageId || userMessage.messageId || null;
       activeStreamingAssistantMessages.set(assistantMessageId, assistantMessage);
     }
+    beginQuestionScrollAnchor(conversationKey, ui.chatBox, userMessage.messageId);
     refreshChatSafely();
     const persistAssistantUpdate = async () => {
       if (!assistantMessage.messageId) return;
@@ -38541,7 +38608,8 @@ ${zoneBSummary}`
       const sendAutoScroller = createStreamingAutoScroller(
         ui.chatBox,
         suspendScrollUpdates,
-        resumeScrollUpdates
+        resumeScrollUpdates,
+        conversationKey
       );
       const queueStreamingPatch = createQueuedStreamingPatch(() => {
         sendAutoScroller.patchAndScroll(() => {
@@ -38635,6 +38703,7 @@ ${zoneBSummary}`
     closeActiveUserContextPopover();
     body.querySelectorAll(".llm-user-context-popover, .llm-history-context-popover").forEach((popover) => popover.remove());
     if (!item) {
+      delete chatBox.dataset.conversationKey;
       chatBox.innerHTML = `
         <div class="llm-welcome">
           <div class="llm-welcome-icon">Iris</div>
@@ -38644,6 +38713,7 @@ ${zoneBSummary}`
       return;
     }
     const conversationKey = getConversationKey(item);
+    chatBox.dataset.conversationKey = String(conversationKey);
     const isGlobalConversation = conversationKey >= GLOBAL_CONVERSATION_KEY_BASE;
     const mutateChatWithScrollGuard = (fn) => {
       withScrollGuard(chatBox, conversationKey, fn);
@@ -39446,7 +39516,7 @@ ${zoneBSummary}`
       }
     }
     syncUserContextAlignmentWidths(body);
-    applyChatScrollSnapshot(chatBox, baselineSnapshot);
+    applyChatScrollSnapshot(chatBox, baselineSnapshot, conversationKey);
     persistChatScrollSnapshotByKey(conversationKey, chatBox);
     if (baselineSnapshot.mode === "followBottom") {
       scheduleFollowBottomStabilization(body, conversationKey, chatBox);
@@ -57460,6 +57530,7 @@ ${err.stack}`, "error");
           captureChatBoxViewportState();
           return;
         }
+        handleQuestionAnchorUserScroll(getConversationKey(item), chatBox);
         persistChatScrollSnapshot(item, chatBox);
         captureChatBoxViewportState();
       };
@@ -57468,6 +57539,7 @@ ${err.stack}`, "error");
         scrollBottomBtn.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
+          releaseQuestionScrollAnchor(getConversationKey(item), chatBox);
           chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: "smooth" });
         });
       }
@@ -61307,6 +61379,19 @@ ${modelHint}` : modelLabel;
           const previous = chatBoxViewportState;
           const current = buildChatBoxViewportState();
           if (!current) return;
+          if (applyQuestionScrollAnchor(conversationKey, chatBox)) {
+            positionExpandedContextPanels();
+            captureChatBoxViewportState();
+            if (item && chatBox.childElementCount) {
+              persistChatScrollSnapshot(item, chatBox);
+            }
+            return;
+          }
+          if (isQuestionScrollManual(conversationKey, chatBox)) {
+            chatBoxViewportState = current;
+            positionExpandedContextPanels();
+            return;
+          }
           const viewportChanged = Boolean(
             previous && (current.width !== previous.width || current.height !== previous.height)
           );
