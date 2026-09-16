@@ -47,7 +47,10 @@ function installIrisLocalVoice({ doc, inputBox, inputSection, voiceBtn, voiceCan
     voiceBtn.dataset.voiceRuntime = state.phase;
     voiceBtn.disabled = ['checking', 'installing'].includes(state.phase) || ['preparing', 'permission', 'transcribing'].includes(recordingStage);
     voiceBtn.setAttribute('aria-busy', String(state.phase === 'installing' || Boolean(recordingStage && recordingStage !== 'listening')));
-    voiceBtn.title = runtimeLabel(state);
+    voiceBtn.title = recordingStage === 'listening'
+      ? message('结束录音并转写', 'Stop recording and transcribe')
+      : recordingStage === 'transcribing' ? message('正在转写…', 'Transcribing…') : runtimeLabel(state);
+    voiceBtn.setAttribute('aria-pressed', String(recordingStage === 'listening'));
     voiceBtn.setAttribute('aria-label', voiceBtn.title);
     notice.hidden = !recordingError && recordingStage !== 'permission' && !['installing', 'error'].includes(state.phase);
     notice.dataset.phase = state.phase;
@@ -202,7 +205,7 @@ function installIrisLocalVoice({ doc, inputBox, inputSection, voiceBtn, voiceCan
           job.stage = stage;
           render(stage);
           announce(stage === 'listening'
-            ? message('正在听…点麦克风完成，点发送识别并发送，点 × 取消', 'Listening…mic to finish, send to transcribe and send, × to cancel')
+            ? message('正在录音…点 ■ 结束并转写，点发送识别并发送，点 × 取消', 'Recording…■ to stop and transcribe, send to transcribe and send, × to cancel')
             : stage === 'permission'
               ? message('请允许 Iris Voice 使用麦克风', 'Please allow Iris Voice to use the microphone')
               : message('正在本地识别中英文…', 'Recognizing speech locally…'));
