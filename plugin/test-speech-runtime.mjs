@@ -182,3 +182,20 @@ test('Mac permission prompt is a cancellable, non-listening state', async () => 
   assert.match(h.inputSection.children[0].textContent, /macOS/);
   await h.controller.cancel();
 });
+
+
+test('recording advertises stop and exposes cancellation, then restores idle', async () => {
+  const h = voiceHarness(); await h.start(); await tick();
+  assert.equal(h.voiceBtn.classList.values.has('is-listening'), true);
+  assert.equal(h.voiceBtn.attrs['aria-pressed'], 'true');
+  assert.equal(h.voiceBtn.title, '结束录音并转写');
+  assert.equal(h.voiceCancelBtn.classList.values.has('is-visible'), true);
+  assert.equal(h.voiceCancelBtn.parentElement.style.display, '');
+  h.voiceBtn.listeners.click(); await tick();
+  assert.equal(h.voiceBtn.disabled, true);
+  assert.equal(h.voiceBtn.title, '正在转写…');
+  h.processes[0].complete('finished'); await tick();
+  assert.equal(h.voiceBtn.attrs['aria-pressed'], 'false');
+  assert.equal(h.voiceBtn.title, '语音输入');
+  assert.equal(h.voiceCancelBtn.parentElement.style.display, 'none');
+});
