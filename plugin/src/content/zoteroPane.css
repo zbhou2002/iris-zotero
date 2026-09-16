@@ -9914,3 +9914,21 @@ button.llm-paper-context-summary-trigger.llm-history-context-trigger {
 .llm-panel .llm-tab-bottom-wrapper { padding-inline: 0 !important; }
 .llm-panel .llm-input-section { margin-inline: 12px !important; box-sizing: border-box; }
 .llm-panel > .llm-status { margin-inline: 12px; box-sizing: border-box; }
+
+/* Recording is a visible stop action, not a microphone with subtle tint. */
+.llm-panel #llm-voice-input.is-listening {
+  background: var(--iris-quiet-ink) !important;
+  color: var(--material-sidepane, white) !important;
+  opacity: 1 !important;
+}
+.llm-panel #llm-voice-input.is-listening::before {
+  content: "" !important; display: block !important;
+  width: 10px !important; height: 10px !important;
+  border-radius: 2px; background: currentColor !important;
+  mask: none !important; -webkit-mask: none !important;
+  opacity: 1 !important;
+}
+.llm-panel #llm-voice-cancel.is-visible {
+  display: inline-flex !important; visibility: visible !important; opacity: 1 !important;
+  background: var(--iris-quiet-hover) !important;
+}
