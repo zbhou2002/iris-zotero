@@ -18,6 +18,8 @@ function replaceOnce(anchor, replacement) {
 }
 const language = fs.readFileSync(path.join(root, 'src/content/scripts/iris-language.js'), 'utf8');
 const readerQuote = fs.readFileSync(path.join(root, 'src/content/scripts/iris-reader-quote.js'), 'utf8');
+const codexModels = fs.readFileSync(path.join(root, 'src/content/scripts/iris-codex-models.js'), 'utf8');
+replaceOnce('  async function fetchAvailableModels(provider) {', codexModels + '\n  async function fetchAvailableModels(provider) {');
 replaceRange('  function applySelectedTextPreview(body, itemId) {', '  function includeSelectedTextFromReader(body, item, prefetchedText, options) {', readerQuote + `
   function applySelectedTextPreview(body, itemId) {
     const list = body.querySelector('#llm-selected-context-list');

@@ -23616,90 +23616,13 @@ ${output}`);
     return headers;
   }
   async function fetchAvailableModels(provider) {
+    if (provider === "openai-codex") return getIrisCodexCatalog().refresh({ force: true });
     await ensureZoteroProxyFromSystem({ forceRefresh: true });
     const cred = await readProviderOAuthCredential(provider);
     if (!cred) {
       return [];
     }
     try {
-      if (provider === "openai-codex") {
-        let activeCred = cred;
-        let triedCliRefresh = false;
-        const buildHeaders2 = (credential) => {
-          return {
-            ...ensureProviderAuthHeaderInit(credential),
-            Accept: "application/json"
-          };
-        };
-        const fetchDynamicModels = async (headers) => {
-          const res = await getFetch()(
-            "https://chatgpt.com/backend-api/codex/models?client_version=1.0.0",
-            {
-              method: "GET",
-              headers
-            }
-          );
-          if (res.ok) {
-            const data = await res.json();
-            const models = Array.isArray(data) ? data : data.models || [];
-            if (Array.isArray(models) && models.length > 0) {
-              const rows = models.map((m) => {
-                const id = String(m.id || m.slug || m.model_id || "").trim();
-                const label = String(m.name || m.title || id).trim() || id;
-                return { id, label };
-              }).filter((m) => m.id);
-              if (rows.length > 0) {
-                ztoolkit?.log?.(
-                  `Iris: Codex dynamic models: ${rows.map((r) => r.id).join(", ")}`
-                );
-                return rows;
-              }
-            }
-          }
-          return [];
-        };
-        const validateToken = async (headers) => {
-          const usageRes = await getFetch()(
-            "https://chatgpt.com/backend-api/wham/usage",
-            {
-              method: "GET",
-              headers
-            }
-          );
-          return usageRes.status !== 401 && usageRes.status !== 403;
-        };
-        for (let attempt = 0; attempt < 2; attempt += 1) {
-          const headers = buildHeaders2(activeCred);
-          try {
-            const rows = await fetchDynamicModels(headers);
-            if (rows.length > 0) {
-              return dedupeModels(rows);
-            }
-          } catch (err) {
-            ztoolkit?.log?.("Iris: Codex dynamic model fetch failed", err);
-          }
-          try {
-            if (await validateToken(headers)) {
-              return [...CODEX_KNOWN_MODELS];
-            }
-          } catch (err) {
-            ztoolkit?.log?.("Iris: Codex token validation failed", err);
-          }
-          if (!triedCliRefresh) {
-            triedCliRefresh = true;
-            const refreshed = await refreshCodexOAuthCredentialViaCli();
-            if (refreshed?.accessToken) {
-              activeCred = refreshed;
-              continue;
-            }
-          }
-          ztoolkit?.log?.(
-            "Iris: Codex OAuth credential could not be validated; model list unavailable"
-          );
-          return [];
-        }
-        return [];
-      }
       if (provider === "github-copilot") {
         try {
           const models = await fetchCopilotAvailableModels();
@@ -25913,7 +25836,7 @@ ${params.prompt}`;
       return "fail";
     }
   }
-  var OAUTH_COPIED_TOAST, COPILOT_DEVICE_LOGIN_COPY, PROVIDER_CLI_SPECS, PROVIDER_MARKER_PREFIX, PROXY_AUTO_APPLIED_PREF, PROXY_LAST_SIGNATURE_PREF, PROXY_LAST_MODE_PREF, DEFAULT_NODE_RUNTIME_MAJOR, OAUTH_PREF_PREFIX, COPILOT_TOKEN_URL, DEFAULT_COPILOT_API_BASE, COPILOT_EDITOR_VERSION, COPILOT_USER_AGENT, COPILOT_GITHUB_API_VERSION, COPILOT_SUPPRESSED_MODEL_IDS, CODEX_OAUTH_USER_AGENT, CODEX_KNOWN_MODELS, GEMINI_CLI_KNOWN_MODELS, COPILOT_KNOWN_MODELS, GEMINI_AUTH_URL, GEMINI_TOKEN_URL, GEMINI_REDIRECT_URI, GEMINI_SCOPES, GEMINI_CODE_ASSIST_API_BASE, GEMINI_CODE_ASSIST_STREAM_URL, COPILOT_GITHUB_CLIENT_ID, GITHUB_DEVICE_CODE_URL, GITHUB_ACCESS_TOKEN_URL;
+  var OAUTH_COPIED_TOAST, COPILOT_DEVICE_LOGIN_COPY, PROVIDER_CLI_SPECS, PROVIDER_MARKER_PREFIX, PROXY_AUTO_APPLIED_PREF, PROXY_LAST_SIGNATURE_PREF, PROXY_LAST_MODE_PREF, DEFAULT_NODE_RUNTIME_MAJOR, OAUTH_PREF_PREFIX, COPILOT_TOKEN_URL, DEFAULT_COPILOT_API_BASE, COPILOT_EDITOR_VERSION, COPILOT_USER_AGENT, COPILOT_GITHUB_API_VERSION, COPILOT_SUPPRESSED_MODEL_IDS, CODEX_OAUTH_USER_AGENT, GEMINI_CLI_KNOWN_MODELS, COPILOT_KNOWN_MODELS, GEMINI_AUTH_URL, GEMINI_TOKEN_URL, GEMINI_REDIRECT_URI, GEMINI_SCOPES, GEMINI_CODE_ASSIST_API_BASE, GEMINI_CODE_ASSIST_STREAM_URL, COPILOT_GITHUB_CLIENT_ID, GITHUB_DEVICE_CODE_URL, GITHUB_ACCESS_TOKEN_URL;
   var init_oauthCli = __esm({
     "src/utils/oauthCli.ts"() {
       "use strict";
@@ -26041,12 +25964,6 @@ ${params.prompt}`;
         "gpt-41-copilot"
       ]);
       CODEX_OAUTH_USER_AGENT = "codex_cli_rs/0.0.0 (Iris)";
-      CODEX_KNOWN_MODELS = [
-        { id: "gpt-5.3-codex", label: "GPT-5.3 Codex (Latest)" },
-        { id: "gpt-5.2-codex", label: "GPT-5.2 Codex" },
-        { id: "gpt-5.1-codex-max", label: "GPT-5.1 Codex Max" },
-        { id: "gpt-5.1-codex-mini", label: "GPT-5.1 Codex Mini" }
-      ];
       GEMINI_CLI_KNOWN_MODELS = [
         { id: "gemini-3.1-pro-preview", label: "Gemini 3.1 Pro Preview" },
         { id: "gemini-3-flash-preview", label: "Gemini 3 Flash Preview" },
@@ -44740,6 +44657,8 @@ Keep the summary concise (under 1000 characters). Write in the same language as 
           model: id,
           provider: label,
           providerId: provider,
+          label: row.label || id,
+          isDefault: row.isDefault === true,
           apiBase: row.apiBase,
           apiKey: row.apiKey
         });
@@ -44768,6 +44687,8 @@ Keep the summary concise (under 1000 characters). Write in the same language as 
     return { profiles, choices };
   }
   function pickBestDefaultModel(choices) {
+    const catalogDefault = choices.find(entry => entry.providerId === "openai-codex" && entry.isDefault);
+    if (catalogDefault) return catalogDefault.model;
     const parseGptVersion2 = (model) => {
       const m = model.match(/^gpt-(\d+(?:\.\d+)?)/i);
       if (!m) return null;
@@ -50097,6 +50018,7 @@ ${result.logs}`);
       if (!menu) return;
       const { choices } = getModelChoices();
       menu.innerHTML = "";
+      appendIrisCodexCatalogStatus(menu, getLang().startsWith("zh"));
       if (!choices.length) {
         dropdown.dataset.value = "";
         dropdown.dataset.providerId = "";
@@ -50127,8 +50049,8 @@ ${result.logs}`);
             item.dataset.value === model && (item.dataset.providerId || "") === providerId
           );
         });
-        closeTranslateStyleDropdown(dropdown);
         if (persist) {
+          closeTranslateStyleDropdown(dropdown);
           setPref("selectionTranslate.model", model);
           setPref("selectionTranslate.provider", providerId);
         }
@@ -50622,6 +50544,12 @@ ${result.logs}`);
       renderAuthorProfileModelOptions();
     };
     const refreshOneProvider = async (provider) => {
+      if (provider === "openai-codex") {
+        await getIrisCodexCatalog().refresh({ force: true });
+        cache = parseModelCache();
+        renderModels();
+        return;
+      }
       const isOAuth = PROVIDERS.includes(provider);
       const getTarget = () => providerStatusRefs.get(provider) || progressText;
       const target = getTarget();
@@ -51865,6 +51793,17 @@ ${event.output.slice(0, 220)}` : "";
     basicBox.append(basicTitle, basicBody);
     root.appendChild(connectionModeBox);
     root.appendChild(selectionTranslateGroup);
+    const onCodexCatalogChanged = event => {
+      if (!event.detail?.irisCodexCatalog) return;
+      if (!root.isConnected) { doc.removeEventListener("llm-models-changed", onCodexCatalogChanged); return; }
+      cache = parseModelCache();
+      renderModels();
+    };
+    doc.addEventListener("llm-models-changed", onCodexCatalogChanged);
+    selectionTranslateModelDropdown?.querySelector(".llm-tr-dropdown-trigger")?.addEventListener("click", () => {
+      void getIrisCodexCatalog().refresh({ force: true });
+    });
+    void getIrisCodexCatalog().refresh();
     const savedScrollTop = Number(getPref2("settingsScrollTop") || "0");
     if (Number.isFinite(savedScrollTop) && savedScrollTop > 0) {
       win.setTimeout(() => {
@@ -60539,6 +60478,7 @@ ${err.stack}`, "error");
     const updateLiveSettingsReadinessState = (event) => {
       const detail = event.detail;
       if (!detail || typeof detail !== "object") return;
+      if (detail.irisCodexCatalog) return;
       const primaryConnectionMode = detail.primaryConnectionMode === "custom" ? "custom" : "oauth";
       liveSettingsReadinessState = {
         primaryConnectionMode,
@@ -61030,6 +60970,7 @@ ${modelHint}` : modelLabel;
       const { choices } = getModelChoices();
       const { currentModel, currentProvider } = getSelectedModelInfo2();
       modelMenu.innerHTML = "";
+      appendIrisCodexCatalogStatus(modelMenu, getPanelLang().startsWith("zh"));
       appendDropdownInstruction(
         modelMenu,
         i18n.modelSelectHint,
@@ -61066,7 +61007,7 @@ ${modelHint}` : modelLabel;
           optionClasses,
           {
             type: "button",
-            textContent: isSelected ? `\u2713  ${entry.model}` : `    ${entry.model}`
+            textContent: isSelected ? `\u2713  ${entry.label || entry.model}` : `    ${entry.label || entry.model}`
           }
         );
         const applyModelSelection = (e) => {
@@ -62562,6 +62503,7 @@ ${after}`;
     }
     const openModelMenu = () => {
       if (!modelMenu || !modelBtn) return;
+      void getIrisCodexCatalog().refresh({ force: true });
       closeSlashMenu();
       closeRetryModelMenu();
       closePromptMenu();
@@ -62580,6 +62522,7 @@ ${after}`;
     };
     const openRetryModelMenu = (anchor) => {
       if (!item || !retryModelMenu) return;
+      void getIrisCodexCatalog().refresh({ force: true });
       closeSlashMenu();
       closeResponseMenu();
       closeExportMenu();
@@ -63517,6 +63460,11 @@ ${after}`;
       panelDoc.addEventListener("llm-models-changed", (event) => {
         updateLiveSettingsReadinessState(event);
         updateModelButton();
+        if (isFloatingMenuOpen(modelMenu)) {
+          rebuildModelMenu();
+          positionFloatingMenu(body, modelMenu, modelBtn);
+        }
+        if (isFloatingMenuOpen(retryModelMenu)) rebuildRetryModelMenu();
       });
     }
   }
@@ -70120,6 +70068,7 @@ ${abstractNote}`);
       Zotero.getMainWindows().map((win) => onMainWindowLoad(win))
     );
     addon.data.initialized = true;
+    void getIrisCodexCatalog().refresh();
   }
   async function onMainWindowLoad(win) {
     addon.data.ztoolkit = createZToolkit();
@@ -70162,6 +70111,7 @@ ${abstractNote}`);
     addon.data.dialog?.window?.close();
   }
   function onShutdown() {
+    irisCodexCatalog?.dispose();
     try {
       for (const win of Zotero.getMainWindows()) {
         try {

@@ -13,6 +13,12 @@
 
 After this first formal installation, Zotero can retrieve future Iris releases through its addon updater. Copying an XPI directly into the profile folder may not update Zotero's registered addon metadata; use the plugin manager for the initial migration. Automatic updates also depend on Zotero's update preferences and GitHub network access.
 
+## Codex model selection
+
+Iris refreshes Codex models in the background on startup and when you open either the chat or selection-translation model picker. It discovers the locally installed Codex executable (preferring the desktop app's bundled executable on supported installation paths) and reads its official `model/list` interface. A signed-in ChatGPT account in Codex is required. Display names, ordering, visibility and the suggested default come from Codex, not a fixed Iris model list. Refresh preserves an existing selection while it remains in the catalog.
+
+The two pickers share one refresh request, with a timeout and a manual **Refresh** action. On failure, Iris displays the reason and retains any previously fetched list; detecting sign-out clears Codex choices. Other providers and custom API settings are not cleared. Discovery does not start a chat or send an inference request. Codex may itself return a cached or bundled catalog, so this is not a guarantee of account access to every listed model; update/sign in to Codex if its own catalog is stale. See [the official model-list interface](https://learn.chatgpt.com/docs/app-server#list-models-modellist).
+
 ## Compatibility and setup
 
 The package declares Zotero **7–10** compatibility, including **10.0.x** patch releases. Iris 3.4.19 has been tested in an isolated **Windows / Zotero 10.0.5** profile. Earlier runtime checks covered Windows and Apple Silicon macOS with Zotero 9.0.6; Zotero 10 on macOS, other Zotero versions and Intel Macs have not been fully validated. One XPI supports both platforms; the Mac microphone helper contains arm64 and x86_64 binaries. Optional local dictation includes Windows and macOS setup scripts; Linux automatic speech setup is not currently provided. Microphone access and a successful local runtime/model installation are still required.
