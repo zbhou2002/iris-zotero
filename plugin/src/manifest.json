@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Iris",
-  "version": "3.4.18",
+  "version": "3.4.19",
   "description": "Iris — a quiet, focused research assistant for Zotero",
   "homepage_url": "https://github.com/zbhou2002/iris-zotero#readme",
   "author": "zbhou2002 (Iris); zhile and upstream contributors (AIdea)",
@@ -14,7 +14,7 @@
       "id": "aidea@visterainer",
       "update_url": "https://github.com/zbhou2002/iris-zotero/releases/latest/download/updates.json",
       "strict_min_version": "7.0",
-      "strict_max_version": "9.0.*"
+      "strict_max_version": "10.0.*"
     }
   }
 }

@@ -179,3 +179,26 @@ test('all completion and resize paths are gated by the question-scroll state', (
   assert.match(bundle, /if \(isQuestionScrollManual\(conversationKey, chatBox\)\) \{\s+chatBoxViewportState = current;/);
   assert.match(bundle, /releaseQuestionScrollAnchor\(getConversationKey\(item\), chatBox\);\s+chatBox\.scrollTo/);
 });
+
+test('wheel intent releases the anchor before a deferred native scroll event or streaming render', () => {
+  const h = scrollHarness();
+  const start = bundle.indexOf('      chatBox.addEventListener("wheel", (event) => {');
+  const end = bundle.indexOf('      }, { passive: true });', start);
+  assert(start > 0 && end > start);
+  let wheel;
+  h.context.chatBox = h.box;
+  h.context.item = {};
+  h.context.getConversationKey = () => h.conversationKey;
+  h.box.addEventListener = (name, handler) => { assert.equal(name, 'wheel'); wheel = handler; };
+  vm.runInContext(bundle.slice(start, end + '      }, { passive: true });'.length), h.context);
+  h.box.scrollHeight = 1600;
+  h.applyQuestionScrollAnchor(h.conversationKey, h.box);
+  wheel({ deltaY: 0 });
+  wheel({ deltaY: 100, ctrlKey: true });
+  assert.equal(h.isQuestionScrollManual(h.conversationKey, h.box), false, 'horizontal/zoom gestures do not release the anchor');
+  wheel({ deltaY: 100, ctrlKey: false });
+  h.box.scrollTop = 1024;
+  h.withScrollGuard(h.box, h.conversationKey, () => { h.box.scrollHeight += 800; });
+  assert.equal(h.box.scrollTop, 1024, 'streaming cannot restore the old anchor before the native scroll event');
+  assert.equal(h.isQuestionScrollManual(h.conversationKey, h.box), true);
+});

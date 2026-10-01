@@ -24,7 +24,9 @@ Iris 是专注论文阅读的 Zotero 助手：结合当前论文对话、手动�
 
 精华高亮没有固定句数配额，筛选提示词可以在设置中修改。高亮是阅读辅助，不能保证客观或完整；没有可用文本的扫描 PDF 可能需要先 OCR。
 
-安装包声明兼容 Zotero 7–9，实际运行测试环境为 Windows 及 Apple Silicon macOS / Zotero 9.0.6。Intel Mac 尚未完成实机验证。Linux 暂无自动语音环境安装。
+安装包声明兼容 Zotero 7–10，包含 10.0.x 后续小版本。Iris 3.4.19 已在隔离的 Windows / Zotero 10.0.5 环境测试；此前也测试过 Windows 及 Apple Silicon macOS / Zotero 9.0.6。Mac 上的 Zotero 10、其他 Zotero 版本及 Intel Mac 尚未全面验证。Linux 暂无自动语音环境安装。
+
+Zotero 要求插件声明经过验证的大版本上限，因此当前使用 `10.0.*`，不采用无限版本范围；未来大版本仍需测试并发布适配。见 [Zotero 官方开发说明](https://www.zotero.org/support/dev/zotero_10_for_developers)。升级 Zotero 后若旧 Iris 被禁用，请检查插件更新，或通过插件管理器覆盖安装最新 XPI；不要先卸载或删除插件数据。
 
 开源来源与许可见 [PROVENANCE](PROVENANCE.md) 和[第三方声明](../THIRD_PARTY_NOTICES.md)。主页海报为功能概念示意，不是程序截图。
 

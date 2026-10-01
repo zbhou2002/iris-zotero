@@ -239,6 +239,7 @@ manifest.homepage_url = `https://github.com/${release.repository}#readme`;
 manifest.author = 'zbhou2002 (Iris); zhile and upstream contributors (AIdea)';
 manifest.applications.zotero.update_url = `https://github.com/${release.repository}/releases/latest/download/updates.json`;
 manifest.applications.zotero.strict_min_version = '7.0';
-manifest.applications.zotero.strict_max_version = '9.0.*';
+// Zotero requires a tested major-version ceiling; the wildcard includes patch updates.
+manifest.applications.zotero.strict_max_version = '10.0.*';
 fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
 console.log(`Built Iris ${manifest.version}: ${Buffer.byteLength(text)} bytes, syntax valid`);

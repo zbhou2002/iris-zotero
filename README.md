@@ -14,7 +14,7 @@ A focused AI reading companion for Zotero. **Ask about the passage in front of y
 
 **[Download Iris →](https://github.com/zbhou2002/iris-zotero/releases/latest)** &nbsp; · &nbsp; [Get started](#start-reading-with-iris) &nbsp; · &nbsp; [简体中文 ↓](#简体中文)
 
-**New in [3.4.16](https://github.com/zbhou2002/iris-zotero/releases/tag/v3.4.16):** a refined rainbow highlighter, consistent circular controls, and a calmer, evenly aligned composer.
+**New in [3.4.19](https://github.com/zbhou2002/iris-zotero/releases/tag/v3.4.19):** Zotero 10 compatibility and more reliable manual scrolling during streamed replies.
 
 ### Your AI. Your way.
 
@@ -44,7 +44,7 @@ Translate when language gets in the way. Use Paper Essence to return to the sour
 2. In Zotero: **Tools → Plugins → ⚙ → Install Add-on From File…** Select the XPI and restart Zotero.
 3. Open a PDF, choose Iris in the sidebar, and connect your preferred model service in Settings.
 
-**Windows + macOS · English + 简体中文 · Zotero 7–9 declared compatibility.** See the [setup guide](docs/GUIDE.md) for tested environments and optional voice setup.
+**Windows + macOS · English + 简体中文 · Zotero 7–10 declared compatibility.** See the [setup guide](docs/GUIDE.md) for tested environments and optional voice setup.
 
 <details>
 <summary>A few things to know before your first conversation</summary>
@@ -52,7 +52,7 @@ Translate when language gets in the way. Use Paper Essence to return to the sour
 - Chat, translation and Paper Essence use your selected model provider; use a supported account login or your own API credentials. Relevant text is sent to that provider.
 - Voice input needs a one-time runtime/model download and microphone permission. Recognition then runs locally. Sending the transcript to chat sends its text to your selected provider. This is speech-to-text input, not spoken AI replies.
 - AI highlights are a reading aid. Check the source when evaluating a claim. Scanned PDFs may need OCR.
-- Tested environments include Windows and Apple Silicon macOS with Zotero 9.0.6. Intel Macs and other declared Zotero versions have not been fully validated; Linux has no automatic speech setup.
+- Tested environments include Windows with Zotero 10.0.5, and earlier Windows and Apple Silicon macOS tests with Zotero 9.0.6. Zotero 10 on macOS, Intel Macs and other declared Zotero versions have not been fully validated; Linux has no automatic speech setup.
 
 </details>
 
@@ -72,7 +72,7 @@ Iris 是陪你留在论文里的 AI 阅读助手。**选中文段就能追问，
 
 **[下载 Iris →](https://github.com/zbhou2002/iris-zotero/releases/latest)** &nbsp; · &nbsp; [安装与使用](docs/README.zh-CN.md) &nbsp; · &nbsp; [English ↑](#english)
 
-**[3.4.16 新版](https://github.com/zbhou2002/iris-zotero/releases/tag/v3.4.16)：** 更精致的彩虹高亮笔、统一的圆形操作按钮，以及留白对称、点击时保持原色的输入区。
+**[3.4.19 新版](https://github.com/zbhou2002/iris-zotero/releases/tag/v3.4.19)：** 适配 Zotero 10，并改善流式回复期间手动滚动的稳定性。
 
 ### 订阅也好，API 也好，用你自己的 AI。
 
@@ -102,7 +102,7 @@ Iris 是陪你留在论文里的 AI 阅读助手。**选中文段就能追问，
 2. Zotero → **工具 → 插件 → ⚙ → 从文件安装**，选择安装包后重启 Zotero。
 3. 打开 PDF，进入 Iris 侧栏，在设置中连接你使用的模型服务。
 
-**Windows 与 macOS · 中英文界面 · 安装包声明支持 Zotero 7–9。** 实测环境及语音配置见[使用说明](docs/README.zh-CN.md)。
+**Windows 与 macOS · 中英文界面 · 安装包声明支持 Zotero 7–10。** 实测环境及语音配置见[使用说明](docs/README.zh-CN.md)。
 
 <details>
 <summary>开始前，了解这几件事</summary>
@@ -110,7 +110,7 @@ Iris 是陪你留在论文里的 AI 阅读助手。**选中文段就能追问，
 - 对话、翻译和文献精华使用你选择的模型服务，可选支持的账号登录或自有 API 凭据，相关文本会发送给该服务商。
 - 语音首次使用需要下载运行环境与模型，并允许麦克风。之后在本机识别；作为对话发送时，转写文字仍会发送给所选模型。当前是语音转文字输入，不是 AI 语音朗读回复。
 - 精华高亮是阅读辅助，重要结论请回到原文核对；扫描版 PDF 可能需要先 OCR。
-- 已测试 Windows 和 Apple Silicon Mac / Zotero 9.0.6。Intel Mac 和其他声明支持的 Zotero 版本尚未全面验证；Linux 暂无自动语音安装。
+- 已测试 Windows / Zotero 10.0.5，此前也测试过 Windows 和 Apple Silicon Mac / Zotero 9.0.6。Mac 上的 Zotero 10、Intel Mac 和其他声明支持的 Zotero 版本尚未全面验证；Linux 暂无自动语音安装。
 
 </details>
 

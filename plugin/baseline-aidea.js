@@ -57535,6 +57535,13 @@ ${err.stack}`, "error");
         captureChatBoxViewportState();
       };
       chatBox.addEventListener("scroll", persistScroll, { passive: true });
+      // Wheel intent arrives before Gecko's deferred scroll event. Release the
+      // anchor immediately so a streaming render cannot undo that user input.
+      chatBox.addEventListener("wheel", (event) => {
+        if (event.deltaY && !event.ctrlKey) {
+          releaseQuestionScrollAnchor(getConversationKey(item), chatBox);
+        }
+      }, { passive: true });
       if (scrollBottomBtn) {
         scrollBottomBtn.addEventListener("click", (e) => {
           e.preventDefault();
